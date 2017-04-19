@@ -42,17 +42,12 @@ class Segment:
         if x_0 == x_1:
             return (x_0, (1 - 2 * (x_pt > x_0)) * pi/2)
         if y_0 == y_1:
-            if x_0 <= x_pt <= x_1:
-                return (x_pt, 0)
-            else:
-                return
+            return (x_pt, 0)
         delta_x, delta_y = x_1 - x_0, y_1 - y_0
         x_final = x_0 + (y_pt - y_0) * delta_x / delta_y
-        if min(x_0, x_1) <= x_final <= max(x_0, x_1):
-            angle = ((delta_x > 0 and delta_y < 0) or
-                     (delta_x < 0 and delta_y > 0)) * pi + atan(delta_y / delta_x)
-            return(x_final, angle)
-        return
+        angle = ((delta_x > 0 and delta_y < 0) or
+                 (delta_x < 0 and delta_y > 0)) * pi + atan(delta_y / delta_x)
+        return(x_final, angle)
 
     def copy(self):
         """
