@@ -23,19 +23,19 @@ def test(filename):
     for s in segments:
         events.add((min(s.endpoints), "in", s))
         events.add((max(s.endpoints), "out", s))
-    SL = SortedList()
-    IL = []
+    in_life = SortedList()
+    result = []
     print("Events (init):", events)
     print("\n========\n  LOOP  \n========\n\n   ")
     while True:
         try:
-            p, t, s = events.pop(0)
+            current, event_type, segment = events.pop(0)
 
-            print("Current:", p, t, s)
+            print("Current:", current, event_type, segment)
             print("Events:", events)
-            print("SL:", len(SL), SL)
+            print("SL:", len(in_life), in_life)
 
-            tycat(segments, IL, p)
+            tycat(segments, result, current)
             input("Press [ENTER] to continue...\n")
 
         except IndexError:
@@ -43,9 +43,9 @@ def test(filename):
 
     print("\n\n=========\n THE END\n=========")
     print("Events:", events)
-    print("SL:", SL)
-    print("IL:", IL)
-    tycat(segments, IL)
+    print("SL:", in_life)
+    print("IL:", result)
+    tycat(segments, result)
     #TODO: merci de completer et de decommenter les lignes suivantes
     #results = lancer bentley ottmann sur les segments et l'ajusteur
     #...
