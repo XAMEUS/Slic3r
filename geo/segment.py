@@ -2,10 +2,10 @@
 segment between two points.
 """
 import struct
+from math import pi, atan
 from geo.point import Point
 from geo.quadrant import Quadrant
 from geo.coordinates_hash import CoordinatesHash
-
 
 class Segment:
     """
@@ -31,6 +31,25 @@ class Segment:
         create a segment from an array of two points.
         """
         self.endpoints = points
+
+    def key(self, point):
+        """
+        Return the key
+        """
+        x_0, y_0 = self.endpoints[0].coordinates
+        x_1, y_1 = self.endpoints[1].coordinates
+        x_pt, y_pt = point.coordinates
+        # if y_0 == y_1:
+        #     if x_0 <= x_pt <= x_1:
+        #         return (x_pt, 0) #TODO
+        # if x_0 == x_1:
+        #     return (x_0, (1 - 2 * (x_pt > x_0)) * pi/2) #TODO
+
+        delta_x, delta_y = x_1 - x_0, y_1 - y_0
+        x_final = x_0 + (y_pt - y_0) * delta_x / delta_y
+        angle = ((delta_x > 0 and delta_y < 0) or
+                 (delta_x < 0 and delta_y > 0)) * pi + atan(delta_y/delta_x)
+        return(x_final, angle)
 
     def copy(self):
         """
