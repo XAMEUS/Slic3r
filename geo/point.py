@@ -69,6 +69,9 @@ class Point:
         return self.coordinates == other.coordinates
 
     def __lt__(self, other):
+        """
+        The greatest point is the point with the lowest y coordinate
+        """
         return self.coordinates[1] > other.coordinates[1] or self.coordinates[0] > other.coordinates[0] and self.coordinates[1] == other.coordinates[1]
 
     def __hash__(self):
