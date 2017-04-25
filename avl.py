@@ -94,8 +94,27 @@ class Avl:  #TODO: transform this class into real AVL.
         """
         Remove this cell
         """
-        cell, is_succ = self.successor(), True
-        if cell is None:
-            cell, is_succ = self.predecessor(), False
-        if cell is not None:
-            pass    #TODO: Complete delete.
+        child_l = self.childs[0] != None
+        child_r = self.childs[1] != None
+        child_number = self.father.childs[1] is self
+
+        if child_l and child_r:
+            successor = self.successor()
+            self.value = successor.value
+            successor.father.childs[successor.father.childs[1] is successor] = successor.childs[1]
+        else:
+            if child_l or child_r:
+                self.childs[child_r].father = self.father
+            self.father.childs[child_number] = self.childs[child_r]
+if __name__ == '__main__':
+    a = Avl(10)
+    a.add(5)
+    a.add(2)
+    a.add(7)
+    print(a, "\t", a.childs[0].value)
+    a.add(9)
+    print(a, "\t", a.childs[0].value)
+    a.childs[0].delete()
+    print(a, "\t", a.childs[0].value)
+    a.childs[0].delete()
+    print(a, "\t", a.childs[0].value)
