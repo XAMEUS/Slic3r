@@ -2,9 +2,66 @@
 AVL module
 """
 
-class Avl:  #TODO: transform this class into real AVL.
+class Avl:
     """
     The main class
+    """
+    def __init__(self):
+        self.size = 0
+        self.node = None
+
+    def __str__(self):
+        if self.size:
+            return str(self.node)
+        return ""
+
+    def __iter__(self):
+        if self.size:
+            yield from iter(self.node)
+
+    def add(self, n_value): #TODO key
+        """
+        Add a new value in the AVL
+        """
+        if self.size:
+            self.node.add(n_value)
+        else:
+            self.node = self.node(n_value)
+        self.size += 1
+
+    def delete(self, node_to_remove):
+        """
+        Delete the node in parameter
+        """
+        if node_to_remove is not self.node:
+            node_to_remove.delete()
+        else:
+            pass
+        self.size -= 1
+
+    def search(self, value): #TODO key
+        """
+        Search the right cell and return if the cell is present
+        """
+        assert self.size
+        return self.node.search(value)
+
+    def min(self):
+        """
+        Find min
+        """
+        assert self.size
+        return self.node.min()
+    def max(self):
+        """
+        Find max
+        """
+        assert self.size
+        return self.node.max()
+
+class Node:  #TODO: transform this class into real AVL.
+    """
+    The node class
     """
     def __init__(self, value, father=None):
         self.father = father
@@ -22,10 +79,10 @@ class Avl:  #TODO: transform this class into real AVL.
 
     def __iter__(self):
         if self.childs[0] is not None:
-            yield from self.childs[0].__iter__()
+            yield from iter(self.childs[0])
         yield self.value
         if self.childs[1] is not None:
-            yield from self.childs[1].__iter__()
+            yield from iter(self.childs[1])
 
     def add(self, n_value, key=lambda x: x):
         """
@@ -35,7 +92,7 @@ class Avl:  #TODO: transform this class into real AVL.
         while True:
             tmp = key(n_value) > key(current.value)
             if current.childs[tmp] is None:
-                current.childs[tmp] = Avl(n_value, current)
+                current.childs[tmp] = Node(n_value, current)
                 return current.childs[tmp]
             current = current.childs[tmp]
 
