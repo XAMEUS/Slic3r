@@ -102,19 +102,9 @@ class Avl:  #TODO: transform this class into real AVL.
             successor = self.successor()
             self.value = successor.value
             successor.father.childs[successor.father.childs[1] is successor] = successor.childs[1]
+            if successor.childs[1]:
+                successor.childs[1].father = successor.father
         else:
             if child_l or child_r:
                 self.childs[child_r].father = self.father
             self.father.childs[child_number] = self.childs[child_r]
-if __name__ == '__main__':
-    a = Avl(10)
-    a.add(5)
-    a.add(2)
-    a.add(7)
-    print(a, "\t", a.childs[0].value)
-    a.add(9)
-    print(a, "\t", a.childs[0].value)
-    a.childs[0].delete()
-    print(a, "\t", a.childs[0].value)
-    a.childs[0].delete()
-    print(a, "\t", a.childs[0].value)
