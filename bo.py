@@ -72,7 +72,19 @@ def test(filename):
 
             else: #event_type == "x"
                 result.append(current)
-                # TODO swapp
+                u = sweep.search(segment[0])
+                right = u.successor()
+                if right:
+                    intrsctn = u.value.intersection_with(right.value)
+                    if intrsctn is not None:
+                        events.add((intrsctn, "x", (u.value, right.value)))
+                v = sweep.search(segment[1])
+                left = v.predecessor()
+                if left:
+                    intrsctn = v.value.intersection_with(left.value)
+                    if intrsctn is not None:
+                        events.add((intrsctn, "x", (left.value, v.value)))
+
 
             tycat(segments, result, current)
             input("Press [ENTER] to continue...\n")
