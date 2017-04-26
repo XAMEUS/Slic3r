@@ -8,9 +8,10 @@ for each file:
     - print some statistics
 """
 import sys
-from geo.segment import load_segments
-from geo.tycat import tycat
 from sortedcontainers import SortedList
+from geo.segment import load_segments, Segment
+from geo.tycat import tycat
+from SweepLine import SweepLines
 
 def test(filename):
     """
@@ -23,7 +24,7 @@ def test(filename):
     for s in segments:
         events.add((min(s.endpoints), "in", s))
         events.add((max(s.endpoints), "out", s))
-    sweep = SortedList()
+    sweep = SweepLines()
     result = []
     print("Events (init):", events)
     print("\n========\n  LOOP  \n========\n\n   ")
@@ -31,39 +32,43 @@ def test(filename):
         try:
             current, event_type, segment = events.pop(0)
 
+            Segment.point = current
+
             print("Current:", current, event_type, segment)
             print("Events:", events)
             print("SL:", len(sweep), sweep)
 
+            tmp_sweep = SweepLines()
+            for node in sweep:
+                tmp_sweep.put(node.value)
+            sweep = tmp_sweep
+
             if event_type == "in":
-                xpos, angle = segment.key(current)
-                key = (xpos, angle, segment)
-                sweep.add(key)
-                left = sweep.bisect_left(key) - 1
-                if left > -1:
-                    _, _, left = sweep[left]
+                node = sweep.put(segment)
+                left = node.predecessor()
+                if left:
+                    left = left.value
                     intrsctn = segment.intersection_with(left)
                     if intrsctn is not None:
-                        events.add((intrsctn, "x", (left, s)))
-                right = sweep.bisect_right(key)
-                if right < len(sweep):
-                    _, _, right = sweep[right]
+                        events.add((intrsctn, "x", (left, segment)))
+                right = node.successor()
+                if right:
+                    right = right.value
                     intrsctn = segment.intersection_with(right)
                     if intrsctn is not None:
-                        events.add((intrsctn, "x", (s, right)))
+                        events.add((intrsctn, "x", (segment, right)))
 
             elif event_type == "out":
-                xpos, angle = segment.key(current)
-                key = (segment.endpoints[0].coordinates[0] if segment.endpoints[0] != current else segment.endpoints[1].coordinates[0], angle, segment)
-                sweep.remove(key)
-                left = sweep.bisect_left(key)
-                right = sweep.bisect_right(key)
-                if left > -1 and right < len(sweep):
-                    _, _, left = sweep[left]
-                    _, _, right = sweep[right]
+                node = sweep.search(segment)
+                left = node.predecessor()
+                right = node.successor()
+                if left and right:
+                    left = left.value
+                    right = right.value
                     intrsctn = left.intersection_with(right)
                     if intrsctn is not None:
                         events.add((intrsctn, "x", (left, right)))
+                sweep.delete(segment)
 
             else: #event_type == "x"
                 result.append(current)
