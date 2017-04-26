@@ -13,6 +13,8 @@ from geo.segment import load_segments, Segment
 from geo.tycat import tycat
 from avl import Avl
 
+DEBUG = False
+
 def test(filename):
     """
     run bentley ottmann
@@ -34,15 +36,19 @@ def test(filename):
 
             Segment.point = current
 
-            print("Current:", current, event_type, segment)
-            print("Events:", events)
-            print("SL:", sweep)
+            if DEBUG:
+                print("Current:", current, event_type, segment)
+            if DEBUG:
+                print("Events:", events)
+            if DEBUG:
+                print("SL:", sweep)
 
             tmp_sweep = Avl()
             for node in sweep:
                 tmp_sweep.add(node.value)
             sweep = tmp_sweep
-            print("SL:", sweep)
+            if DEBUG:
+                print("SL:", sweep)
 
             if event_type == "in":
                 node = sweep.add(segment)
@@ -91,8 +97,10 @@ def test(filename):
                                             and intrsctn.coordinates[0] != current.coordinates[0]:
                         events.add((intrsctn, "x", (left.value, v.value)))
 
-            print("Events:", events)
-            print("SL:", len(sweep), sweep)
+            if DEBUG:
+                print("Events:", events)
+            if DEBUG:
+                print("SL:", len(sweep), sweep)
 
             tycat(segments, result, current)
             input("Press [ENTER] to continue...\n")

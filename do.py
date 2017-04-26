@@ -13,6 +13,8 @@ from geo.segment import load_segments, Segment
 from geo.tycat import tycat
 from SweepLine import SweepLines
 
+DEBUG = False
+
 def test(filename):
     """
     run bentley ottmann
@@ -34,15 +36,19 @@ def test(filename):
 
             Segment.point = current
 
-            print("Current:", current, event_type, segment)
-            print("Events:", events)
-            print("SL:", len(sweep), sweep)
+            if DEBUG:
+                print("Current:", current, event_type, segment)
+            if DEBUG:
+                print("Events:", events)
+            if DEBUG:
+                print("SL:", len(sweep), sweep)
 
             tmp_sweep = SortedList()
             for line in sweep:
                 tmp_sweep.add(line)
             sweep = tmp_sweep
-            print("SL:", len(sweep), sweep)
+            if DEBUG:
+                print("SL:", len(sweep), sweep)
 
             if event_type == "in":
                 sweep.add(segment)
@@ -83,6 +89,7 @@ def test(filename):
                     u = sweep[u]
                     right = sweep[right]
                     intrsctn = u.intersection_with(right)
+                    print(current, intrsctn)
                     if intrsctn is not None and intrsctn.coordinates[1] <= current.coordinates[1] \
                                             and intrsctn.coordinates[0] != current.coordinates[0]:
                         events.add((intrsctn, "x", (u, right)))
@@ -92,12 +99,15 @@ def test(filename):
                     v = sweep[v]
                     left = sweep[left]
                     intrsctn = v.intersection_with(left)
+                    print(current, intrsctn)
                     if intrsctn is not None and intrsctn.coordinates[1] <= current.coordinates[1] \
                                             and intrsctn.coordinates[0] != current.coordinates[0]:
                         events.add((intrsctn, "x", (left, v)))
 
-            print("Events:", events)
-            print("SL:", len(sweep), sweep)
+            if DEBUG:
+                print("Events:", events)
+            if DEBUG:
+                print("SL:", len(sweep), sweep)
 
             tycat(segments, result, current)
             input("Press [ENTER] to continue...\n")
