@@ -26,6 +26,9 @@ class Segment:
         intersection = segment1.intersection_with(segment2)
 
     """
+
+    point = None
+
     def __init__(self, points):
         """
         create a segment from an array of two points.
@@ -48,6 +51,9 @@ class Segment:
         angle = ((delta_x > 0 and delta_y < 0) or
                  (delta_x < 0 and delta_y > 0)) * pi + atan(delta_y / delta_x)
         return(x_final, angle)
+
+    def __lt__(self, o):
+        return self.key(Segment.point) < o.key(Segment.point)
 
     def copy(self):
         """
