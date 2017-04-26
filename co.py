@@ -11,7 +11,7 @@ import sys
 from sortedcontainers import SortedList
 from geo.segment import load_segments, Segment
 from geo.tycat import tycat
-from SweepLine import SweepLines
+from avl import Avl
 
 def test(filename):
     """
@@ -24,7 +24,7 @@ def test(filename):
     for s in segments:
         events.add((min(s.endpoints), "in", s))
         events.add((max(s.endpoints), "out", s))
-    sweep = SweepLines()
+    sweep = Avl()
     result = []
     print("Events (init):", events)
     print("\n========\n  LOOP  \n========\n\n   ")
@@ -36,16 +36,16 @@ def test(filename):
 
             print("Current:", current, event_type, segment)
             print("Events:", events)
-            print("SL:", len(sweep), sweep)
+            print("SL:", sweep)
 
-            tmp_sweep = SweepLines()
+            tmp_sweep = Avl()
             for node in sweep:
-                tmp_sweep.put(node.value)
+                tmp_sweep.add(node.value)
             sweep = tmp_sweep
-            print("SL:", len(sweep), sweep)
+            print("SL:", sweep)
 
             if event_type == "in":
-                node = sweep.put(segment)
+                node = sweep.add(segment)
                 left = node.predecessor()
                 if left:
                     left = left.value
