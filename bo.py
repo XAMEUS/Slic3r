@@ -28,8 +28,9 @@ def test(filename):
         events.add((max(s.endpoints), "out", s))
     sweep = SweepLines()
     result = []
-    print("Events (init):", events)
-    print("\n========\n  LOOP  \n========\n\n   ")
+    if DEBUG:
+        print("Events (init):", events)
+        print("\n========\n  LOOP  \n========\n\n   ")
     while True:
         try:
             current, event_type, segment = events.pop(0)
@@ -114,9 +115,10 @@ def test(filename):
             break
 
     print("\n\n=========\n THE END\n=========")
-    print("Events:", events)
-    print("SL:", sweep)
-    print("IL:", result)
+    if DEBUG:
+        print("Events:", events)
+        print("SL:", sweep)
+        print("IL:", result)
     tycat(segments, result)
     #TODO: merci de completer et de decommenter les lignes suivantes
     #results = lancer bentley ottmann sur les segments et l'ajusteur

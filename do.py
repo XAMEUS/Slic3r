@@ -28,8 +28,9 @@ def test(filename):
         events.add((max(s.endpoints), "out", s))
     sweep = SortedList()
     result = []
-    print("Events (init):", events)
-    print("\n========\n  LOOP  \n========\n\n   ")
+    if DEBUG:
+        print("Events (init):", events)
+        print("\n========\n  LOOP  \n========\n\n   ")
     while True:
         try:
             current, event_type, segment = events.pop(0)
@@ -57,16 +58,18 @@ def test(filename):
                 if left >= 0:
                     left = sweep[left]
                     intrsctn = segment.intersection_with(left)
-                    if intrsctn is not None and intrsctn.coordinates[1] <= current.coordinates[1] \
-                                            and intrsctn.coordinates[0] != current.coordinates[0]:
-                        events.add((intrsctn, "x", (left, segment)))
+                    if intrsctn is not None:
+                        intrsctn = adjuster.hash_point(intrsctn)
+                        if intrsctn.coordinates[1] <= current.coordinates[1] and intrsctn.coordinates[0] != current.coordinates[0]:
+                            events.add((intrsctn, "x", (left, segment)))
                 right = i+1
                 if right < len(sweep):
                     right = sweep[right]
                     intrsctn = segment.intersection_with(right)
-                    if intrsctn is not None and intrsctn.coordinates[1] <= current.coordinates[1] \
-                                            and intrsctn.coordinates[0] != current.coordinates[0]:
-                        events.add((intrsctn, "x", (segment, right)))
+                    if intrsctn is not None:
+                        intrsctn = adjuster.hash_point(intrsctn)
+                        if intrsctn.coordinates[1] <= current.coordinates[1] and intrsctn.coordinates[0] != current.coordinates[0]:
+                            events.add((intrsctn, "x", (segment, right)))
 
             elif event_type == "out":
                 i = sweep.index(segment)
@@ -76,9 +79,10 @@ def test(filename):
                     left = sweep[left]
                     right = sweep[right]
                     intrsctn = left.intersection_with(right)
-                    if intrsctn is not None and intrsctn.coordinates[1] <= current.coordinates[1] \
-                                            and intrsctn.coordinates[0] != current.coordinates[0]:
-                        events.add((intrsctn, "x", (left, right)))
+                    if intrsctn is not None:
+                        intrsctn = adjuster.hash_point(intrsctn)
+                        if intrsctn.coordinates[1] <= current.coordinates[1] and intrsctn.coordinates[0] != current.coordinates[0]:
+                            events.add((intrsctn, "x", (left, right)))
                 sweep.remove(segment)
 
             else: #event_type == "x"
@@ -89,37 +93,38 @@ def test(filename):
                     u = sweep[u]
                     right = sweep[right]
                     intrsctn = u.intersection_with(right)
-                    print(current, intrsctn)
-                    if intrsctn is not None and intrsctn.coordinates[1] <= current.coordinates[1] \
-                                            and intrsctn.coordinates[0] != current.coordinates[0]:
-                        events.add((intrsctn, "x", (u, right)))
+                    if intrsctn is not None:
+                        intrsctn = adjuster.hash_point(intrsctn)
+                        if intrsctn.coordinates[1] <= current.coordinates[1] and intrsctn.coordinates[0] != current.coordinates[0]:
+                            events.add((intrsctn, "x", (u, right)))
                 v = sweep.index(segment[1])
                 left = v-1
                 if left >= 0:
                     v = sweep[v]
                     left = sweep[left]
                     intrsctn = v.intersection_with(left)
-                    print(current, intrsctn)
-                    if intrsctn is not None and intrsctn.coordinates[1] <= current.coordinates[1] \
-                                            and intrsctn.coordinates[0] != current.coordinates[0]:
-                        events.add((intrsctn, "x", (left, v)))
+                    if intrsctn is not None:
+                        intrsctn = adjuster.hash_point(intrsctn)
+                        if intrsctn.coordinates[1] <= current.coordinates[1] and intrsctn.coordinates[0] != current.coordinates[0]:
+                            events.add((intrsctn, "x", (left, v)))
 
             if DEBUG:
                 print("Events:", events)
             if DEBUG:
                 print("SL:", len(sweep), sweep)
 
-            tycat(segments, result, current)
-            input("Press [ENTER] to continue...\n")
+            #tycat(segments, result, current)
+            #input("Press [ENTER] to continue...\n")
 
         except IndexError as e:
             print(e)
             break
 
     print("\n\n=========\n THE END\n=========")
-    print("Events:", events)
-    print("SL:", sweep)
-    print("IL:", result)
+    if DEBUG:
+        print("Events:", events)
+        print("SL:", sweep)
+        print("IL:", result)
     tycat(segments, result)
     #TODO: merci de completer et de decommenter les lignes suivantes
     #results = lancer bentley ottmann sur les segments et l'ajusteur

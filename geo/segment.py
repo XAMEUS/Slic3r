@@ -27,7 +27,7 @@ class Segment:
 
     """
 
-    point = None
+    point = Point([0, 0])
 
     def __init__(self, points):
         """
