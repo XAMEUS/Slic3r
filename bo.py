@@ -42,6 +42,7 @@ def test(filename):
             for node in sweep:
                 tmp_sweep.put(node.value)
             sweep = tmp_sweep
+            print("SL:", len(sweep), sweep)
 
             if event_type == "in":
                 node = sweep.put(segment)
@@ -49,13 +50,13 @@ def test(filename):
                 if left:
                     left = left.value
                     intrsctn = segment.intersection_with(left)
-                    if intrsctn is not None:
+                    if intrsctn is not None and intrsctn.coordinates[1] <= current.coordinates[1]:
                         events.add((intrsctn, "x", (left, segment)))
                 right = node.successor()
                 if right:
                     right = right.value
                     intrsctn = segment.intersection_with(right)
-                    if intrsctn is not None:
+                    if intrsctn is not None and intrsctn.coordinates[1] <= current.coordinates[1]:
                         events.add((intrsctn, "x", (segment, right)))
 
             elif event_type == "out":
@@ -66,7 +67,7 @@ def test(filename):
                     left = left.value
                     right = right.value
                     intrsctn = left.intersection_with(right)
-                    if intrsctn is not None:
+                    if intrsctn is not None and intrsctn.coordinates[1] <= current.coordinates[1]:
                         events.add((intrsctn, "x", (left, right)))
                 sweep.delete(segment)
 
@@ -76,15 +77,17 @@ def test(filename):
                 right = u.successor()
                 if right:
                     intrsctn = u.value.intersection_with(right.value)
-                    if intrsctn is not None:
+                    if intrsctn is not None and intrsctn.coordinates[1] <= current.coordinates[1]:
                         events.add((intrsctn, "x", (u.value, right.value)))
                 v = sweep.search(segment[1])
                 left = v.predecessor()
                 if left:
                     intrsctn = v.value.intersection_with(left.value)
-                    if intrsctn is not None:
+                    if intrsctn is not None and intrsctn.coordinates[1] <= current.coordinates[1]:
                         events.add((intrsctn, "x", (left.value, v.value)))
 
+            print("Events:", events)
+            print("SL:", len(sweep), sweep)
 
             tycat(segments, result, current)
             input("Press [ENTER] to continue...\n")
