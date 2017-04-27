@@ -75,9 +75,7 @@ def test(filename):
                     left = sweep[left]
                     right = sweep[right]
                     intrsctn = segment.intersection_with(right)
-                    if intrsctn and \
-                        intrsctn.coordinates[1] <= current.coordinates[1] and\
-                        intrsctn.coordinates[0] != current.coordinates[0]:
+                    if intrsctn and intrsctn not in results:
                         heappush(events, intrsctn)
                         intrsctn = adjuster.hash_point(intrsctn)
                         if intrsctn not in dict_seg:
@@ -89,7 +87,7 @@ def test(filename):
                             if right not in segments[1]:
                                 segments[1].append(right)
                 sweep.remove(segment)
-
+        print(segments)
         if segments[1]: # inter
             nb_coupes += 1
             results.append(current)
