@@ -37,11 +37,9 @@ def test(filename):
         heappush(events, b)
         if a in dict_seg:
             dict_seg[a][0].append(segment)
-            dict_seg[a][2].append(segment)
         else:
             dict_seg[a] = [[segment], [], []]
         if b in dict_seg:
-            dict_seg[b][0].append(segment)
             dict_seg[b][2].append(segment)
         else:
             dict_seg[b] = [[], [], [segment]]
@@ -69,6 +67,7 @@ def test(filename):
                         intrsctn.coordinates[1] <= current.coordinates[1] and\
                         intrsctn.coordinates[0] != current.coordinates[0]:
                         heappush(events, intrsctn)
+                        intrsctn = adjuster.hash_point(intrsctn)
                         if intrsctn not in dict_seg:
                             dict_seg[intrsctn] = [[], [left, right], []]
                         else:
@@ -93,6 +92,7 @@ def test(filename):
                     if intrsctn and \
                         intrsctn.coordinates[1] <= current.coordinates[1] and\
                         intrsctn.coordinates[0] != current.coordinates[0]:
+                        intrsctn = adjuster.hash_point(intrsctn)
                         heappush(events, intrsctn)
                         if intrsctn not in dict_seg:
                             dict_seg[intrsctn] = [[], [left, current], []]
@@ -109,6 +109,7 @@ def test(filename):
                     if intrsctn and \
                         intrsctn.coordinates[1] <= current.coordinates[1] and\
                         intrsctn.coordinates[0] != current.coordinates[0]:
+                        intrsctn = adjuster.hash_point(intrsctn)
                         heappush(events, intrsctn)
                         if intrsctn not in dict_seg:
                             dict_seg[intrsctn] = [[], [right, current], []]
