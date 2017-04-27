@@ -56,10 +56,10 @@ def test(filename):
                         if intrsctn not in dict_seg:
                             dict_seg[intrsctn] = [[], [left, current], []]
                         else:
-                            segments = dict_seg[segment]
+                            segments = dict_seg[current]
                             if left not in segments[1]:
                                 segments[1].append(left)
-                            if current not in segments[1]:
+                            if segment not in segments[1]:
                                 segments[1].append(current)
         elif segments[2]: # out
             pass
