@@ -13,8 +13,8 @@ from sortedcontainers import SortedList
 from geo.tycat import tycat
 from geo.segment import load_segments, load_segments_stdin, Segment
 
-DEBUG = False
-ENTER = False
+DEBUG = True
+ENTER = True
 
 def test(filename):
     """
@@ -77,6 +77,7 @@ def test(filename):
                         if intrsctn not in dict_seg:
                             dict_seg[intrsctn] = [[], [left, right], []]
                         else:
+                            segments = dict_seg[intrsctn]
                             if left not in segments[1]:
                                 segments[1].append(left)
                             if right not in segments[1]:
@@ -88,9 +89,10 @@ def test(filename):
             results.append(current)
             for segment in segments[1]:
                 sweep.remove(segment)
+            Segment.point = current
             for segment in segments[1]:
                 sweep.add(segment)
-            u = sweep.index(max(segments[1]))
+            u = sweep.index(min(segments[1]))
             right = u+1
             if right < len(sweep):
                 u = sweep[u]
@@ -106,11 +108,12 @@ def test(filename):
                         if intrsctn not in dict_seg:
                             dict_seg[intrsctn] = [[], [u, right], []]
                         else:
+                            segments = dict_seg[intrsctn]
                             if u not in segments[1]:
                                 segments[1].append(u)
                             if right not in segments[1]:
                                 segments[1].append(right)
-            v = sweep.index(min(segments[1]))
+            v = sweep.index(max(segments[1]))
             left = v-1
             if left >= 0:
                 v = sweep[v]
@@ -126,6 +129,7 @@ def test(filename):
                         if intrsctn not in dict_seg:
                             dict_seg[intrsctn] = [[], [left, v], []]
                         else:
+                            segments = dict_seg[intrsctn]
                             if v not in segments[1]:
                                 segments[1].append(v)
                             if left not in segments[1]:
@@ -148,7 +152,7 @@ def test(filename):
                         if intrsctn not in dict_seg:
                             dict_seg[intrsctn] = [[], [left, segment], []]
                         else:
-                            segments = dict_seg[current]
+                            segments = dict_seg[intrsctn]
                             if left not in segments[1]:
                                 segments[1].append(left)
                             if segment not in segments[1]:
@@ -165,7 +169,7 @@ def test(filename):
                         if intrsctn not in dict_seg:
                             dict_seg[intrsctn] = [[], [right, segment], []]
                         else:
-                            segments = dict_seg[current]
+                            segments = dict_seg[intrsctn]
                             if right not in segments[1]:
                                 segments[1].append(right)
                             if segment not in segments[1]:
