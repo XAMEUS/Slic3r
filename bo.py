@@ -13,6 +13,8 @@ from geo.tycat import tycat
 from sortedcontainers import SortedList
 from geo.segment import load_segments, load_segments_stdin
 
+DEBUG = True
+
 def test(filename):
     """
     run bentley ottmann
@@ -29,6 +31,7 @@ def test(filename):
     tycat(SEGMENTS)
 
     for segment in SEGMENTS: #On ajoute les événements adéquats
+
         a, b = min(segment.endpoints), max(segment.endpoints)
         heappush(events, a)
         heappush(events, b)
@@ -46,6 +49,11 @@ def test(filename):
     while events: #Traitement des événements
         current = heappop(events)
         segments = dict_seg[current]
+        if DEBUG:
+            print("Current:", current, segments)
+            print("Events:", events)
+            print("SL:", len(sweep), sweep)
+
         if segments[0]: # in
             for segment in segments[0]:
                 sweep.add(segment)
@@ -62,6 +70,20 @@ def test(filename):
                             segments = dict_seg[current]
                             if left not in segments[1]:
                                 segments[1].append(left)
+                            if segment not in segments[1]:
+                                segments[1].append(current)
+                right = i+1
+                if right < len(sweep):
+                    right = sweep[right]
+                    intrsctn = segment.intersection_with(right)
+                    if intrsctn:
+                        heappush(events, intrsctn)
+                        if intrsctn not in dict_seg:
+                            dict_seg[intrsctn] = [[], [right, current], []]
+                        else:
+                            segments = dict_seg[current]
+                            if right not in segments[1]:
+                                segments[1].append(right)
                             if segment not in segments[1]:
                                 segments[1].append(current)
         elif segments[2]: # out
