@@ -51,8 +51,10 @@ def test(filename):
             print("Current:", current, segments)
             print("Events:", events)
             print("SL:", len(sweep), sweep)
-            tycat(SEGMENTS, results, current, sweep) #TODO: liste des segments en vie
-            print(segments)
+            tycat(SEGMENTS, results, current, sweep)
+            print("in", segments[0])
+            print("inter", segments[1])
+            print("out", segments[2])
 
         if segments[2]: # out
             while segments[2]:
