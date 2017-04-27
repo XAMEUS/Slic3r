@@ -141,8 +141,8 @@ def compute_x(segment, current):
     """
     Compute x with a cache
     """
-    x_0, y_0 = segment[0].coordinates
-    x_1, y_1 = segment[1].coordinates
+    x_0, y_0 = segment.endpoints[0].coordinates
+    x_1, y_1 = segment.endpoints[1].coordinates
     x_pt, y_pt = current.coordinates
     if y_0 == y_1:
         return x_pt
