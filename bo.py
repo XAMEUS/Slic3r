@@ -8,10 +8,10 @@ for each file:
     - print some statistics
 """
 import sys
-from geo.segment import load_segments
-from geo.tycat import tycat
 from heapq import heappush, heappop
+from geo.tycat import tycat
 from sortedcontainers import SortedList
+from geo.segment import load_segments, load_segments_stdin
 
 def test(filename):
     """
@@ -22,7 +22,10 @@ def test(filename):
     sweep = SortedList() #(Sorted)List des segments en vie
     results = [] #Les points finaux
 
-    adjuster, SEGMENTS = load_segments(filename)
+    if filename is not None:
+        adjuster, SEGMENTS = load_segments(filename)
+    else:
+        adjuster, SEGMENTS = load_segments_stdin()
     tycat(SEGMENTS)
 
     for segment in SEGMENTS: #On ajoute les événements adéquats
@@ -81,6 +84,8 @@ def main():
     """
     launch test on each file.
     """
+    if(len(sys.argv) == 1):
+        test(None)
     for filename in sys.argv[1:]:
         test(filename)
 
