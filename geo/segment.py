@@ -2,10 +2,10 @@
 segment between two points.
 """
 import struct
+from math import pi, atan
 from geo.point import Point
 from geo.quadrant import Quadrant
 from geo.coordinates_hash import CoordinatesHash
-
 
 class Segment:
     """
@@ -26,11 +26,39 @@ class Segment:
         intersection = segment1.intersection_with(segment2)
 
     """
+
+    point = Point([0, 0])
+
     def __init__(self, points):
         """
         create a segment from an array of two points.
         """
         self.endpoints = points
+
+        x_0, y_0 = points[0].coordinates
+        x_1, y_1 = points[1].coordinates
+        delta_x, delta_y = x_1 - x_0, y_1 - y_0
+
+        self.angle = ((delta_x > 0 and delta_y < 0) or
+                      (delta_x < 0 and delta_y > 0)) * pi - atan(delta_y / delta_x)
+
+    def key(self, point):
+        """
+        Return the key
+        """
+        x_0, y_0 = self.endpoints[0].coordinates
+        x_1, y_1 = self.endpoints[1].coordinates
+        x_pt, y_pt = point.coordinates
+        if x_0 == x_1:
+            return (x_0, (1 - 2 * (x_pt > x_0)) * pi/2)
+        if y_0 == y_1:
+            return (x_pt, 0)
+        delta_x, delta_y = x_1 - x_0, y_1 - y_0
+        x_final = x_0 + (y_pt - y_0) * delta_x / delta_y
+        return(x_final, (1 - 2 * (x_pt > x_0)) * self.angle)
+
+    def __lt__(self, o):
+        return self.key(Segment.point) < o.key(Segment.point)
 
     def copy(self):
         """
