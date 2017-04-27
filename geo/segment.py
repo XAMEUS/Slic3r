@@ -177,11 +177,11 @@ def load_segments_stdin():
     segments = []
     adjuster = CoordinatesHash()
 
-    line = input("Type your segments here:")
+    line = input("Type your segments here: ")
     while len(line):
         coordinates = [float(i) for i in line.split(",")]
         raw_points = [Point(coordinates[:2]), Point(coordinates[2:])]
         adjusted_points = [adjuster.hash_point(p) for p in raw_points]
         segments.append(Segment(adjusted_points))
-        line = input("Type your segments here:")
+        line = input()
     return adjuster, segments
