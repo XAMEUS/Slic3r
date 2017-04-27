@@ -18,39 +18,57 @@ def test(filename):
     run bentley ottmann
     """
     events = [] #Tas des événements: (point, type_d_evenement)
-    d = {} #Dictionnaire contenant les segments au point (point, type_d_evenement)
+    dict_seg = {} #Dictionnaire contenant les segments au point (point, type_d_evenement)
     sweep = SortedList() #(Sorted)List des segments en vie
+    results = [] #Les points finaux
 
-    adjuster, segments = load_segments(filename)
-    tycat(segments)
+    adjuster, SEGMENTS = load_segments(filename)
+    tycat(SEGMENTS)
 
-    for segment in segments: #On ajoute les événements adéquats
+    for segment in SEGMENTS: #On ajoute les événements adéquats
         a, b = min(segment.endpoints), max(segment.endpoints)
-        heappush(events, (a, "in"))
-        heappush(events, (b, "out"))
-        d[(a, "in")] = segment
-        d[(b, "out")] = segment
+        heappush(events, a)
+        heappush(events, b)
+        if a in dict_seg:
+            dict_seg[a][0].append(segment)
+            dict_seg[a][2].append(segment)
+        else:
+            dict_seg[a] = [[segment], [], [segment]]
+        if b in dict_seg:
+            dict_seg[b][0].append(segment)
+            dict_seg[b][2].append(segment)
+        else:
+            dict_seg[b] = [[segment], [], [segment]]
 
     while events: #Traitement des événements
-        current, status = heappop(events)
-        segment = d[(current, status)]
-        if status == "in":
-            sweep.add(segment)
-            i = sweep.index(segment)
-            left = i-1
-            if left >= 0:
-                intrsctn = segment.intersection_with(left)
-                if intrsctn:
-                    intrsctn
-                events.add((intrsctn, "x"))
-                d[(intrsctn, "x")] = [left, segment]
-        elif status == "out":
+        current = heappop(events)
+        segments = dict_seg[current]
+        if segments[0]: # in
+            for segment in segments[0]:
+                sweep.add(segment)
+                i = sweep.index(segment)
+                left = i-1
+                if left >= 0:
+                    left = sweep[left]
+                    intrsctn = segment.intersection_with(left)
+                    if intrsctn:
+                        heappush(events, intrsctn)
+                        if intrsctn not in dict_seg:
+                            dict_seg[intrsctn] = [[], [left, current], []]
+                        else:
+                            segments = dict_seg[segment]
+                            if left not in segments[1]:
+                                segments[1].append(left)
+                            if current not in segments[1]:
+                                segments[1].append(current)
+        elif segments[2]: # out
             pass
         else:
-            pass
-        tycat(segments, current) #TODO: liste des segments en vie
+            results.append(current)
+        tycat(SEGMENTS, results, current) #TODO: liste des segments en vie
         input("Press [ENTER] to continue...\n")
-
+    tycat(SEGMENTS, results)
+    input("Press [ENTER] to continue...\n")
     #TODO: merci de completer et de decommenter les lignes suivantes
     #results = lancer bentley ottmann sur les segments et l'ajusteur
     #...
