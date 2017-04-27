@@ -52,8 +52,6 @@ def test(filename):
     dict_seg = {} #Dictionnaire contenant les segments au point (point, type_d_evenement)
     sweep = SortedList() #(Sorted)List des segments en vie
     results = [] #Les points finaux
-    nb_coupes = 0 #Si un point d'intersection apparait dans plusieurs segments,
-                    #il compte plusieurs fois
 
     _, segments_origin = load_file(filename)
     load_events(segments_origin, events, dict_seg)
@@ -94,8 +92,8 @@ def test(filename):
     tycat(segments_origin, results)
     if ENTER:
         input("Press [ENTER] to continue...\n")
-    print("le nombre d'intersections (= le nombre de points differents) est", len(results))
-    print("le nombre de coupes dans les segments est", nb_coupes)
+    print("le nombre d'intersections (= le nombre de points differents) est", len(set(results)))
+    print("le nombre de coupes dans les segments est", len(results))
 
 def main():
     """
