@@ -49,6 +49,7 @@ def test(filename):
     while events: #Traitement des événements
         current = heappop(events)
         segments = dict_seg[current]
+
         if DEBUG:
             print("Current:", current, segments)
             print("Events:", events)
@@ -101,7 +102,7 @@ def test(filename):
                         intrsctn = adjuster.hash_point(intrsctn)
                         heappush(events, intrsctn)
                         if intrsctn not in dict_seg:
-                            dict_seg[intrsctn] = [[], [left, current], []]
+                            dict_seg[intrsctn] = [[], [left, segment], []]
                         else:
                             segments = dict_seg[current]
                             if left not in segments[1]:
@@ -118,7 +119,7 @@ def test(filename):
                         intrsctn = adjuster.hash_point(intrsctn)
                         heappush(events, intrsctn)
                         if intrsctn not in dict_seg:
-                            dict_seg[intrsctn] = [[], [right, current], []]
+                            dict_seg[intrsctn] = [[], [right, segment], []]
                         else:
                             segments = dict_seg[current]
                             if right not in segments[1]:
