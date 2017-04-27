@@ -39,12 +39,12 @@ def test(filename):
             dict_seg[a][0].append(segment)
             dict_seg[a][2].append(segment)
         else:
-            dict_seg[a] = [[segment], [], [segment]]
+            dict_seg[a] = [[segment], [], []]
         if b in dict_seg:
             dict_seg[b][0].append(segment)
             dict_seg[b][2].append(segment)
         else:
-            dict_seg[b] = [[segment], [], [segment]]
+            dict_seg[b] = [[], [], [segment]]
 
     while events: #Traitement des événements
         current = heappop(events)
@@ -54,6 +54,29 @@ def test(filename):
             print("Events:", events)
             print("SL:", len(sweep), sweep)
             tycat(SEGMENTS, results, current, sweep) #TODO: liste des segments en vie
+            print(segments)
+
+        if segments[2]: # out
+            for segment in segments[2]:
+                i = sweep.index(segment)
+                left = i-1
+                right = i+1
+                if left >= 0 and right < len(sweep):
+                    left = sweep[left]
+                    right = sweep[right]
+                    intrsctn = segment.intersection_with(right)
+                    if intrsctn is not None:
+                        intrsctn = adjuster.hash_point(intrsctn)
+                        if intrsctn.coordinates[1] <= current.coordinates[1]:
+                            heappush(events, intrsctn)
+                            if intrsctn not in dict_seg:
+                                dict_seg[intrsctn] = [[], [left, right], []]
+                            else:
+                                if left not in segments[1]:
+                                    segments[1].append(left)
+                                if right not in segments[1]:
+                                    segments[1].append(right)
+                sweep.remove(segment)
 
         if segments[0]: # in
             for segment in segments[0]:
@@ -86,9 +109,8 @@ def test(filename):
                             if right not in segments[1]:
                                 segments[1].append(right)
                             if segment not in segments[1]:
-                                segments[1].append(current)
-        elif segments[2]: # out
-            pass
+                                segments[1].append(segment)
+
         else:
             results.append(current)
         input("Press [ENTER] to continue...\n")
