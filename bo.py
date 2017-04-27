@@ -16,24 +16,11 @@ from geo.segment import load_segments, load_segments_stdin, Segment
 DEBUG = True
 ENTER = True
 
-def test(filename):
+def load_events(segments_origin, events, dict_seg):
     """
-    run bentley ottmann
+    Load all events
     """
-    events = [] #Tas des événements: (point, type_d_evenement)
-    dict_seg = {} #Dictionnaire contenant les segments au point (point, type_d_evenement)
-    sweep = SortedList() #(Sorted)List des segments en vie
-    results = [] #Les points finaux
-    nb_coupes = 0 #Si un point d'intersection apparait dans plusieurs segments, il compte plusieurs fois
-
-    if filename is not None:
-        adjuster, segments_origin = load_segments(filename)
-    else:
-        adjuster, segments_origin = load_segments_stdin()
-    tycat(segments_origin)
-
     for segment in segments_origin: #On ajoute les événements adéquats
-
         pt_min, pt_max = min(segment.endpoints), max(segment.endpoints)
         heappush(events, pt_min)
         heappush(events, pt_max)
@@ -45,6 +32,25 @@ def test(filename):
             dict_seg[pt_max][2].append(segment)
         else:
             dict_seg[pt_max] = [[], [], [segment]]
+
+def test(filename):
+    """
+    run bentley ottmann
+    """
+    events = [] #Tas des événements: (point, type_d_evenement)
+    dict_seg = {} #Dictionnaire contenant les segments au point (point, type_d_evenement)
+    sweep = SortedList() #(Sorted)List des segments en vie
+    results = [] #Les points finaux
+    nb_coupes = 0 #Si un point d'intersection apparait dans plusieurs segments,
+                    #il compte plusieurs fois
+
+    if filename is not None:
+        adjuster, segments_origin = load_segments(filename)
+    else:
+        adjuster, segments_origin = load_segments_stdin()
+    tycat(segments_origin)
+    load_events(segments_origin, events, dict_seg)
+
 
     while events: #Traitement des événements
         current = heappop(events)
@@ -89,7 +95,7 @@ def test(filename):
             results.append(current)
             for segment in segments[1]:
                 sweep.remove(segment)
-            Segment.point = current
+            # Segment.point = current
             for segment in segments[1]:
                 sweep.add(segment)
             u = sweep.index(min(segments[1]))
