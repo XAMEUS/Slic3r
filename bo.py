@@ -79,7 +79,7 @@ def test(filename):
                 sweep.remove(segment)
 
         if segments[1]:
-
+            pass
 
         if segments[0]: # in
             for segment in segments[0]:
