@@ -10,10 +10,17 @@ for each file:
 import sys
 from itertools import combinations
 from geo.tycat import tycat
-from geo.segment import load_segments, load_segments_stdin, Segment, key
+from geo.segment import load_segments, load_segments_stdin
 
 def test(filename):
-    _, segments_origin = load_segments(filename)
+    """
+    Launch bruteforce test on filename or stdin
+    """
+    if filename is not None:
+        _, segments_origin = load_segments(filename)
+    else:
+        _, segments_origin = load_segments_stdin()
+    tycat(segments_origin)
     results = []
     for sega, segb in combinations(segments_origin, 2):
         candidate = sega.intersection_with(segb)
@@ -26,6 +33,8 @@ def main():
     """
     launch test on each file.
     """
+    if len(sys.argv) == 1:
+        test(None)
     for filename in sys.argv[1:]:
         test(filename)
 
