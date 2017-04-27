@@ -9,12 +9,12 @@ for each file:
 """
 import sys
 from heapq import heappush, heappop
-from geo.tycat import tycat
 from sortedcontainers import SortedList
-from geo.segment import load_segments, load_segments_stdin
+from geo.tycat import tycat
+from geo.segment import load_segments, load_segments_stdin, Segment
 
-DEBUG = True
-ENTER = True
+DEBUG = False
+ENTER = False
 
 def test(filename):
     """
@@ -24,27 +24,27 @@ def test(filename):
     dict_seg = {} #Dictionnaire contenant les segments au point (point, type_d_evenement)
     sweep = SortedList() #(Sorted)List des segments en vie
     results = [] #Les points finaux
-    nb_coupes = 0
+    nb_coupes = 0 #Si un point d'intersection apparait dans plusieurs segments, il compte plusieurs fois
 
     if filename is not None:
-        adjuster, SEGMENTS = load_segments(filename)
+        adjuster, segments_origin = load_segments(filename)
     else:
-        adjuster, SEGMENTS = load_segments_stdin()
-    tycat(SEGMENTS)
+        adjuster, segments_origin = load_segments_stdin()
+    tycat(segments_origin)
 
-    for segment in SEGMENTS: #On ajoute les événements adéquats
+    for segment in segments_origin: #On ajoute les événements adéquats
 
-        a, b = min(segment.endpoints), max(segment.endpoints)
-        heappush(events, a)
-        heappush(events, b)
-        if a in dict_seg:
-            dict_seg[a][0].append(segment)
+        pt_min, pt_max = min(segment.endpoints), max(segment.endpoints)
+        heappush(events, pt_min)
+        heappush(events, pt_max)
+        if pt_min in dict_seg:
+            dict_seg[pt_min][0].append(segment)
         else:
-            dict_seg[a] = [[segment], [], []]
-        if b in dict_seg:
-            dict_seg[b][2].append(segment)
+            dict_seg[pt_min] = [[segment], [], []]
+        if pt_max in dict_seg:
+            dict_seg[pt_max][2].append(segment)
         else:
-            dict_seg[b] = [[], [], [segment]]
+            dict_seg[pt_max] = [[], [], [segment]]
 
     while events: #Traitement des événements
         current = heappop(events)
@@ -54,7 +54,7 @@ def test(filename):
             print("Current:", current, segments)
             print("Events:", events)
             print("SL:", len(sweep), sweep)
-            tycat(SEGMENTS, results, current, sweep)
+            tycat(segments_origin, results, current, sweep)
             print("in", segments[0])
             print("inter", segments[1])
             print("out", segments[2])
@@ -128,17 +128,17 @@ def test(filename):
                                 segments[1].append(segment)
         if ENTER:
             input("Press [ENTER] to continue...\n")
-    tycat(SEGMENTS, results)
+    tycat(segments_origin, results)
     if ENTER:
         input("Press [ENTER] to continue...\n")
     print("le nombre d'intersections (= le nombre de points differents) est", len(results))
-    print("le nombre de coupes dans les segments (si un point d'intersection apparait dans plusieurs segments, il compte plusieurs fois) est", nb_coupes)
+    print("le nombre de coupes dans les segments est", nb_coupes)
 
 def main():
     """
     launch test on each file.
     """
-    if(len(sys.argv) == 1):
+    if len(sys.argv) == 1:
         test(None)
     for filename in sys.argv[1:]:
         test(filename)
