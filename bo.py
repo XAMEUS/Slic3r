@@ -47,12 +47,12 @@ def test(filename):
     while events: #Traitement des événements
         current = heappop(events)
         segments = dict_seg[current]
-        if DEBUG:
-            print("Current:", current, segments)
-            print("Events:", events)
-            print("SL:", len(sweep), sweep)
-            tycat(SEGMENTS, results, current, sweep) #TODO: liste des segments en vie
-            print(segments)
+        #if DEBUG:
+            #print("Current:", current, segments)
+            #print("Events:", events)
+            #print("SL:", len(sweep), sweep)
+            #tycat(SEGMENTS, results, current, sweep) #TODO: liste des segments en vie
+            #print(segments)
 
         if segments[2]: # out
             while segments[2]:
@@ -96,7 +96,7 @@ def test(filename):
                         intrsctn = adjuster.hash_point(intrsctn)
                         heappush(events, intrsctn)
                         if intrsctn not in dict_seg:
-                            dict_seg[intrsctn] = [[], [left, current], []]
+                            dict_seg[intrsctn] = [[], [left, segment], []]
                         else:
                             segments = dict_seg[current]
                             if left not in segments[1]:
@@ -113,7 +113,7 @@ def test(filename):
                         intrsctn = adjuster.hash_point(intrsctn)
                         heappush(events, intrsctn)
                         if intrsctn not in dict_seg:
-                            dict_seg[intrsctn] = [[], [right, current], []]
+                            dict_seg[intrsctn] = [[], [right, segment], []]
                         else:
                             segments = dict_seg[current]
                             if right not in segments[1]:
