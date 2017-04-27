@@ -2,6 +2,7 @@
 segment between two points.
 """
 import struct
+from functools import lru_cache
 from math import pi, atan
 from geo.point import Point
 from geo.quadrant import Quadrant
@@ -38,27 +39,14 @@ class Segment:
         x_0, y_0 = points[0].coordinates
         x_1, y_1 = points[1].coordinates
         delta_x, delta_y = x_1 - x_0, y_1 - y_0
-
-        self.angle = ((delta_x > 0 and delta_y < 0) or
-                      (delta_x < 0 and delta_y > 0)) * pi - atan(delta_y / delta_x)
-
-    def key(self, point):
-        """
-        Return the key
-        """
-        x_0, y_0 = self.endpoints[0].coordinates
-        x_1, y_1 = self.endpoints[1].coordinates
-        x_pt, y_pt = point.coordinates
         if x_0 == x_1:
-            return (x_0, (1 - 2 * (x_pt > x_0)) * pi/2)
-        if y_0 == y_1:
-            return (x_pt, 0)
-        delta_x, delta_y = x_1 - x_0, y_1 - y_0
-        x_final = x_0 + (y_pt - y_0) * delta_x / delta_y
-        return(x_final, (1 - 2 * (x_pt > x_0)) * self.angle)
+            self.angle = pi/2
+        else:
+            self.angle = ((delta_x > 0 and delta_y < 0) or
+                          (delta_x < 0 and delta_y > 0)) * pi - atan(delta_y / delta_x)
 
     def __lt__(self, o):
-        return self.key(Segment.point) < o.key(Segment.point)
+        return key(self, point) < key(o, point)
 
     def copy(self):
         """
@@ -141,6 +129,24 @@ class Segment:
         return "[" + repr(self.endpoints[0]) + ", " + \
             repr(self.endpoints[1]) + "])"
 
+def key(segment, current):
+    """
+    Return the key of the segment, from the current point
+    """
+    x_clef = compute_x(segment, current)
+    return (x_clef, segment.angle * (1 - 2 * (current.coordinates[0] > x_clef)))
+
+@lru_cache(maxsize=32768)
+def compute_x(segment, current):
+    """
+    Compute x with a cache
+    """
+    x_0, y_0 = segment[0].coordinates
+    x_1, y_1 = segment[1].coordinates
+    x_pt, y_pt = current.coordinates
+    if y_0 == y_1:
+        return x_pt
+    return x_0 + (y_pt - y_0) * (x_1 - x_0) / (y_1 - y_0)
 
 def load_segments(filename):
     """
