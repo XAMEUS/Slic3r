@@ -78,6 +78,9 @@ def test(filename):
                                     segments[1].append(right)
                 sweep.remove(segment)
 
+        if segments[1]:
+
+
         if segments[0]: # in
             for segment in segments[0]:
                 sweep.add(segment)
@@ -95,7 +98,7 @@ def test(filename):
                             if left not in segments[1]:
                                 segments[1].append(left)
                             if segment not in segments[1]:
-                                segments[1].append(current)
+                                segments[1].append(segment)
                 right = i+1
                 if right < len(sweep):
                     right = sweep[right]
@@ -111,8 +114,6 @@ def test(filename):
                             if segment not in segments[1]:
                                 segments[1].append(segment)
 
-        else:
-            results.append(current)
         input("Press [ENTER] to continue...\n")
     tycat(SEGMENTS, results)
     input("Press [ENTER] to continue...\n")
