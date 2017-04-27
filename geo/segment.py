@@ -46,7 +46,7 @@ class Segment:
                           (delta_x < 0 and delta_y > 0)) * pi - atan(delta_y / delta_x)
 
     def __lt__(self, o):
-        return key(self, point) < key(o, point)
+        return key(self, Segment.point) < key(o, Segment.point)
 
     def copy(self):
         """
