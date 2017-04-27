@@ -55,7 +55,8 @@ def test(filename):
             print(segments)
 
         if segments[2]: # out
-            for segment in segments[2]:
+            while segments[2]:
+                segment = segments[2].pop()
                 i = sweep.index(segment)
                 left = i-1
                 right = i+1
@@ -120,7 +121,7 @@ def test(filename):
                             if segment not in segments[1]:
                                 segments[1].append(segment)
 
-        input("Press [ENTER] to continue...\n")
+        #input("Press [ENTER] to continue...\n")
     tycat(SEGMENTS, results)
     input("Press [ENTER] to continue...\n")
     #TODO: merci de completer et de decommenter les lignes suivantes
