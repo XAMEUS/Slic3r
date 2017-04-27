@@ -167,3 +167,21 @@ def load_segments(filename):
             packed_segment = bo_file.read(32)
 
     return adjuster, segments
+
+def load_segments_stdin():
+    """
+    Load segments on stdin
+    For debug purpose
+    example: "400,200,600,400\n200,200,20,400"
+    """
+    segments = []
+    adjuster = CoordinatesHash()
+
+    line = input("Type your segments here:")
+    while len(line):
+        coordinates = [float(i) for i in line.split(",")]
+        raw_points = [Point(coordinates[:2]), Point(coordinates[2:])]
+        adjusted_points = [adjuster.hash_point(p) for p in raw_points]
+        segments.append(Segment(adjusted_points))
+        line = input("Type your segments here:")
+    return adjuster, segments
