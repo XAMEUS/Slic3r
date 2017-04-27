@@ -14,6 +14,7 @@ from sortedcontainers import SortedList
 from geo.segment import load_segments, load_segments_stdin
 
 DEBUG = True
+ENTER = True
 
 def test(filename):
     """
@@ -23,6 +24,7 @@ def test(filename):
     dict_seg = {} #Dictionnaire contenant les segments au point (point, type_d_evenement)
     sweep = SortedList() #(Sorted)List des segments en vie
     results = [] #Les points finaux
+    nb_coupes = 0
 
     if filename is not None:
         adjuster, SEGMENTS = load_segments(filename)
@@ -80,7 +82,8 @@ def test(filename):
                                 segments[1].append(right)
                 sweep.remove(segment)
 
-        if segments[1]:
+        if segments[1]: # inter
+            nb_coupes += 1
             results.append(current)
 
         if segments[0]: # in
@@ -122,17 +125,13 @@ def test(filename):
                                 segments[1].append(right)
                             if segment not in segments[1]:
                                 segments[1].append(segment)
-
-        #input("Press [ENTER] to continue...\n")
+        if ENTER:
+            input("Press [ENTER] to continue...\n")
     tycat(SEGMENTS, results)
-    input("Press [ENTER] to continue...\n")
-    #TODO: merci de completer et de decommenter les lignes suivantes
-    #results = lancer bentley ottmann sur les segments et l'ajusteur
-    #...
-    #tycat(segments, intersections)
-    #print("le nombre d'intersections (= le nombre de points differents) est", ...)
-    #print("le nombre de coupes dans les segments (si un point d'intersection apparait dans
-    # plusieurs segments, il compte plusieurs fois) est", ...)
+    if ENTER:
+        input("Press [ENTER] to continue...\n")
+    print("le nombre d'intersections (= le nombre de points differents) est", len(results))
+    print("le nombre de coupes dans les segments (si un point d'intersection apparait dans plusieurs segments, il compte plusieurs fois) est", nb_coupes)
 
 def main():
     """
