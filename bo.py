@@ -82,7 +82,8 @@ def test(filename):
             results.append(current)
 
         if segments[0]: # in
-            for segment in segments[0]:
+            while segments[0]:
+                segment = segments[0].pop()
                 sweep.add(segment)
                 i = sweep.index(segment)
                 left = i-1
