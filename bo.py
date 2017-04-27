@@ -24,6 +24,11 @@ def test(filename):
         heappush(events, (min(segment.endpoints), "in", segment))
         heappush(events, (max(segment.endpoints), "out", segment))
 
+    while events:
+        current, status, segment = heappop(events)
+        tycat(segments, current)
+        input("Press [ENTER] to continue...\n")
+
     #TODO: merci de completer et de decommenter les lignes suivantes
     #results = lancer bentley ottmann sur les segments et l'ajusteur
     #...
