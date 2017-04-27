@@ -11,7 +11,7 @@ import sys
 from heapq import heappush, heappop
 from sortedcontainers import SortedList
 from geo.tycat import tycat
-from geo.segment import load_segments, load_segments_stdin, Segment
+from geo.segment import load_segments, load_segments_stdin
 
 DEBUG = False
 ENTER = False
@@ -33,6 +33,17 @@ def load_events(segments_origin, events, dict_seg):
         else:
             dict_seg[pt_max] = [[], [], [segment]]
 
+def load_file(filename):
+    """
+    Load file
+    """
+    if filename is not None:
+        adjuster, segments_origin = load_segments(filename)
+    else:
+        adjuster, segments_origin = load_segments_stdin()
+    tycat(segments_origin)
+    return adjuster, segments_origin
+
 def test(filename):
     """
     run bentley ottmann
@@ -44,11 +55,7 @@ def test(filename):
     nb_coupes = 0 #Si un point d'intersection apparait dans plusieurs segments,
                     #il compte plusieurs fois
 
-    if filename is not None:
-        adjuster, segments_origin = load_segments(filename)
-    else:
-        adjuster, segments_origin = load_segments_stdin()
-    tycat(segments_origin)
+    _, segments_origin = load_file(filename)
     load_events(segments_origin, events, dict_seg)
 
 
