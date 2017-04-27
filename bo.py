@@ -33,6 +33,17 @@ def load_events(segments_origin, events, dict_seg):
         else:
             dict_seg[pt_max] = [[], [], [segment]]
 
+def load_file(filename):
+    """
+    Load file
+    """
+    if filename is not None:
+        adjuster, segments_origin = load_segments(filename)
+    else:
+        adjuster, segments_origin = load_segments_stdin()
+    tycat(segments_origin)
+    return adjuster, segments_origin
+
 def test(filename):
     """
     run bentley ottmann
@@ -44,11 +55,7 @@ def test(filename):
     nb_coupes = 0 #Si un point d'intersection apparait dans plusieurs segments,
                     #il compte plusieurs fois
 
-    if filename is not None:
-        adjuster, segments_origin = load_segments(filename)
-    else:
-        adjuster, segments_origin = load_segments_stdin()
-    tycat(segments_origin)
+    adjuster, segments_origin = load_file(filename)
     load_events(segments_origin, events, dict_seg)
 
 
@@ -98,12 +105,12 @@ def test(filename):
             for segment in tmp:
                 sweep.add(segment)
             print(sweep)
-            u = sweep.index(min(segments[1]))
-            right = u+1
+            sweep_seg_min = sweep.index(min(segments[1]))
+            right = sweep_seg_min+1
             if right < len(sweep):
-                u = sweep[u]
+                sweep_seg_min = sweep[sweep_seg_min]
                 right = sweep[right]
-                intrsctn = u.intersection_with(right)
+                intrsctn = sweep_seg_min.intersection_with(right)
                 if intrsctn is not None:
                     intrsctn = adjuster.hash_point(intrsctn)
                     if intrsctn and \
@@ -112,19 +119,19 @@ def test(filename):
                         heappush(events, intrsctn)
                         intrsctn = adjuster.hash_point(intrsctn)
                         if intrsctn not in dict_seg:
-                            dict_seg[intrsctn] = [[], [u, right], []]
+                            dict_seg[intrsctn] = [[], [sweep_seg_min, right], []]
                         else:
                             segments = dict_seg[intrsctn]
-                            if u not in segments[1]:
-                                segments[1].append(u)
+                            if sweep_seg_min not in segments[1]:
+                                segments[1].append(sweep_seg_min)
                             if right not in segments[1]:
                                 segments[1].append(right)
-            v = sweep.index(max(segments[1]))
-            left = v-1
+            sweep_seg_max = sweep.index(max(segments[1]))
+            left = sweep_seg_max-1
             if left >= 0:
-                v = sweep[v]
+                sweep_seg_max = sweep[sweep_seg_max]
                 left = sweep[left]
-                intrsctn = v.intersection_with(left)
+                intrsctn = sweep_seg_max.intersection_with(left)
                 if intrsctn is not None:
                     intrsctn = adjuster.hash_point(intrsctn)
                     if intrsctn and \
@@ -133,11 +140,11 @@ def test(filename):
                         heappush(events, intrsctn)
                         intrsctn = adjuster.hash_point(intrsctn)
                         if intrsctn not in dict_seg:
-                            dict_seg[intrsctn] = [[], [left, v], []]
+                            dict_seg[intrsctn] = [[], [left, sweep_seg_max], []]
                         else:
                             segments = dict_seg[intrsctn]
-                            if v not in segments[1]:
-                                segments[1].append(v)
+                            if sweep_seg_max not in segments[1]:
+                                segments[1].append(sweep_seg_max)
                             if left not in segments[1]:
                                 segments[1].append(left)
 
