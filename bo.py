@@ -50,6 +50,7 @@ def test(filename):
             print("Current:", current, segments)
             print("Events:", events)
             print("SL:", len(sweep), sweep)
+            tycat(SEGMENTS, results, current, sweep) #TODO: liste des segments en vie
 
         if segments[0]: # in
             for segment in segments[0]:
@@ -59,7 +60,7 @@ def test(filename):
                 if left >= 0:
                     left = sweep[left]
                     intrsctn = segment.intersection_with(left)
-                    if intrsctn:
+                    if intrsctn and intrsctn.coordinates[1] <= current.coordinates[1]:
                         heappush(events, intrsctn)
                         if intrsctn not in dict_seg:
                             dict_seg[intrsctn] = [[], [left, current], []]
@@ -87,7 +88,6 @@ def test(filename):
             pass
         else:
             results.append(current)
-        tycat(SEGMENTS, results, current) #TODO: liste des segments en vie
         input("Press [ENTER] to continue...\n")
     tycat(SEGMENTS, results)
     input("Press [ENTER] to continue...\n")
