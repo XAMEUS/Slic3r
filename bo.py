@@ -93,11 +93,13 @@ def test(filename):
         if segments[1]: # inter
             nb_coupes += 1
             results.append(current)
-            for segment in segments[1]:
-                sweep.remove(segment)
-            # Segment.point = current
-            for segment in segments[1]:
+            tmp = [s for s in sweep]
+            print(sweep)
+            Segment.point = current
+            sweep = SortedList()
+            for segment in tmp:
                 sweep.add(segment)
+            print(sweep)
             u = sweep.index(min(segments[1]))
             right = u+1
             if right < len(sweep):
