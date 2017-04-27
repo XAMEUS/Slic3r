@@ -11,22 +11,44 @@ import sys
 from geo.segment import load_segments
 from geo.tycat import tycat
 from heapq import heappush, heappop
+from sortedcontainers import SortedList
 
 def test(filename):
     """
     run bentley ottmann
     """
+    events = [] #Tas des événements: (point, type_d_evenement)
+    d = {} #Dictionnaire contenant les segments au point (point, type_d_evenement)
+    sweep = SortedList() #(Sorted)List des segments en vie
+
     adjuster, segments = load_segments(filename)
     tycat(segments)
 
-    events = []
-    for segment in segments:
-        heappush(events, (min(segment.endpoints), "in", segment))
-        heappush(events, (max(segment.endpoints), "out", segment))
+    for segment in segments: #On ajoute les événements adéquats
+        a, b = min(segment.endpoints), max(segment.endpoints)
+        heappush(events, (a, "in"))
+        heappush(events, (b, "out"))
+        d[(a, "in")] = segment
+        d[(b, "out")] = segment
 
-    while events:
-        current, status, segment = heappop(events)
-        tycat(segments, current)
+    while events: #Traitement des événements
+        current, status = heappop(events)
+        segment = d[(current, status)]
+        if status == "in":
+            sweep.add(segment)
+            i = sweep.index(segment)
+            left = i-1
+            if left >= 0:
+                intrsctn = segment.intersection_with(left)
+                if intrsctn:
+                    intrsctn
+                events.add((intrsctn, "x"))
+                d[(intrsctn, "x")] = [left, segment]
+        elif status == "out":
+            pass
+        else:
+            pass
+        tycat(segments, current) #TODO: liste des segments en vie
         input("Press [ENTER] to continue...\n")
 
     #TODO: merci de completer et de decommenter les lignes suivantes
