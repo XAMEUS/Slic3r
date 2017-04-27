@@ -67,7 +67,9 @@ def test(filename):
                     intrsctn = segment.intersection_with(right)
                     if intrsctn is not None:
                         intrsctn = adjuster.hash_point(intrsctn)
-                        if intrsctn.coordinates[1] <= current.coordinates[1]:
+                        if intrsctn and \
+                            intrsctn.coordinates[1] <= current.coordinates[1] and\
+                            intrsctn.coordinates[0] != current.coordinates[0]:
                             heappush(events, intrsctn)
                             if intrsctn not in dict_seg:
                                 dict_seg[intrsctn] = [[], [left, right], []]
@@ -89,7 +91,9 @@ def test(filename):
                 if left >= 0:
                     left = sweep[left]
                     intrsctn = segment.intersection_with(left)
-                    if intrsctn and intrsctn.coordinates[1] <= current.coordinates[1]:
+                    if intrsctn and \
+                        intrsctn.coordinates[1] <= current.coordinates[1] and\
+                        intrsctn.coordinates[0] != current.coordinates[0]:
                         heappush(events, intrsctn)
                         if intrsctn not in dict_seg:
                             dict_seg[intrsctn] = [[], [left, current], []]
@@ -103,7 +107,9 @@ def test(filename):
                 if right < len(sweep):
                     right = sweep[right]
                     intrsctn = segment.intersection_with(right)
-                    if intrsctn:
+                    if intrsctn and \
+                        intrsctn.coordinates[1] <= current.coordinates[1] and\
+                        intrsctn.coordinates[0] != current.coordinates[0]:
                         heappush(events, intrsctn)
                         if intrsctn not in dict_seg:
                             dict_seg[intrsctn] = [[], [right, current], []]
