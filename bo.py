@@ -11,10 +11,10 @@ import sys
 from heapq import heappush, heappop
 from sortedcontainers import SortedList
 from geo.tycat import tycat
-from geo.segment import load_segments, load_segments_stdin, Segment
+from geo.segment import load_segments, load_segments_stdin
 
-DEBUG = True
-ENTER = True
+DEBUG = False
+ENTER = False
 
 def load_events(segments_origin, events, dict_seg):
     """
@@ -43,6 +43,131 @@ def load_file(filename):
         adjuster, segments_origin = load_segments_stdin()
     tycat(segments_origin)
     return adjuster, segments_origin
+
+def in_event(sweep, segments, events, adjuster, dict_seg, current):
+    """
+    When we have a in event
+    """
+    while segments[0]:
+        segment = segments[0].pop()
+        sweep.add(segment)
+        i = sweep.index(segment)
+        left = i-1
+        if left >= 0:
+            left = sweep[left]
+            intrsctn = segment.intersection_with(left)
+            if intrsctn and \
+                intrsctn.coordinates[1] <= current.coordinates[1] and\
+                intrsctn.coordinates[0] != current.coordinates[0]:
+                intrsctn = adjuster.hash_point(intrsctn)
+                heappush(events, intrsctn)
+                if intrsctn not in dict_seg:
+                    dict_seg[intrsctn] = [[], [left, segment], []]
+                else:
+                    segments = dict_seg[intrsctn]
+                    if left not in segments[1]:
+                        segments[1].append(left)
+                    if segment not in segments[1]:
+                        segments[1].append(segment)
+        right = i+1
+        if right < len(sweep):
+            right = sweep[right]
+            intrsctn = segment.intersection_with(right)
+            if intrsctn and \
+                intrsctn.coordinates[1] <= current.coordinates[1] and\
+                intrsctn.coordinates[0] != current.coordinates[0]:
+                intrsctn = adjuster.hash_point(intrsctn)
+                heappush(events, intrsctn)
+                if intrsctn not in dict_seg:
+                    dict_seg[intrsctn] = [[], [right, segment], []]
+                else:
+                    segments = dict_seg[intrsctn]
+                    if right not in segments[1]:
+                        segments[1].append(right)
+                    if segment not in segments[1]:
+                        segments[1].append(segment)
+
+def inter_event(sweep, segments, results, events, adjuster, dict_seg, current, nb_coupes):
+    """
+    When we have a inter event
+    """
+    nb_coupes += 1
+    results.append(current)
+    tmp = [s for s in sweep]
+    print(sweep)
+    # Segment.point = current
+    sweep = SortedList()
+    for segment in tmp:
+        sweep.add(segment)
+    print(sweep)
+    sweep_seg_min = sweep.index(min(segments[1]))
+    right = sweep_seg_min+1
+    if right < len(sweep):
+        sweep_seg_min = sweep[sweep_seg_min]
+        right = sweep[right]
+        intrsctn = sweep_seg_min.intersection_with(right)
+        if intrsctn is not None:
+            intrsctn = adjuster.hash_point(intrsctn)
+            if intrsctn and \
+                intrsctn.coordinates[1] <= current.coordinates[1] and\
+                intrsctn.coordinates[0] != current.coordinates[0]:
+                heappush(events, intrsctn)
+                intrsctn = adjuster.hash_point(intrsctn)
+                if intrsctn not in dict_seg:
+                    dict_seg[intrsctn] = [[], [sweep_seg_min, right], []]
+                else:
+                    segments = dict_seg[intrsctn]
+                    if sweep_seg_min not in segments[1]:
+                        segments[1].append(sweep_seg_min)
+                    if right not in segments[1]:
+                        segments[1].append(right)
+    sweep_seg_max = sweep.index(max(segments[1]))
+    left = sweep_seg_max-1
+    if left >= 0:
+        sweep_seg_max = sweep[sweep_seg_max]
+        left = sweep[left]
+        intrsctn = sweep_seg_max.intersection_with(left)
+        if intrsctn is not None:
+            intrsctn = adjuster.hash_point(intrsctn)
+            if intrsctn and \
+                intrsctn.coordinates[1] <= current.coordinates[1] and\
+                intrsctn.coordinates[0] != current.coordinates[0]:
+                heappush(events, intrsctn)
+                intrsctn = adjuster.hash_point(intrsctn)
+                if intrsctn not in dict_seg:
+                    dict_seg[intrsctn] = [[], [left, sweep_seg_max], []]
+                else:
+                    segments = dict_seg[intrsctn]
+                    if sweep_seg_max not in segments[1]:
+                        segments[1].append(sweep_seg_max)
+                    if left not in segments[1]:
+                        segments[1].append(left)
+
+def out_event(sweep, segments, results, events, adjuster, dict_seg):
+    """
+    When we have a out event
+    """
+    while segments[2]:
+        segment = segments[2].pop()
+        i = sweep.index(segment)
+        left = i-1
+        right = i+1
+        if left >= 0 and right < len(sweep):
+            left = sweep[left]
+            right = sweep[right]
+            intrsctn = segment.intersection_with(right)
+            if intrsctn and intrsctn not in results:
+                heappush(events, intrsctn)
+                intrsctn = adjuster.hash_point(intrsctn)
+                if intrsctn not in dict_seg:
+                    dict_seg[intrsctn] = [[], [left, right], []]
+                else:
+                    segments = dict_seg[intrsctn]
+                    if left not in segments[1]:
+                        segments[1].append(left)
+                    if right not in segments[1]:
+                        segments[1].append(right)
+        sweep.remove(segment)
 
 def test(filename):
     """
@@ -73,120 +198,14 @@ def test(filename):
             print("out", segments[2])
 
         if segments[2]: # out
-            while segments[2]:
-                segment = segments[2].pop()
-                i = sweep.index(segment)
-                left = i-1
-                right = i+1
-                if left >= 0 and right < len(sweep):
-                    left = sweep[left]
-                    right = sweep[right]
-                    intrsctn = segment.intersection_with(right)
-                    if intrsctn and intrsctn not in results:
-                        heappush(events, intrsctn)
-                        intrsctn = adjuster.hash_point(intrsctn)
-                        if intrsctn not in dict_seg:
-                            dict_seg[intrsctn] = [[], [left, right], []]
-                        else:
-                            segments = dict_seg[intrsctn]
-                            if left not in segments[1]:
-                                segments[1].append(left)
-                            if right not in segments[1]:
-                                segments[1].append(right)
-                sweep.remove(segment)
+            out_event(sweep, segments, results, events, adjuster, dict_seg)
         print(segments)
         if segments[1]: # inter
-            nb_coupes += 1
-            results.append(current)
-            tmp = [s for s in sweep]
-            print(sweep)
-            Segment.point = current
-            sweep = SortedList()
-            for segment in tmp:
-                sweep.add(segment)
-            print(sweep)
-            sweep_seg_min = sweep.index(min(segments[1]))
-            right = sweep_seg_min+1
-            if right < len(sweep):
-                sweep_seg_min = sweep[sweep_seg_min]
-                right = sweep[right]
-                intrsctn = sweep_seg_min.intersection_with(right)
-                if intrsctn is not None:
-                    intrsctn = adjuster.hash_point(intrsctn)
-                    if intrsctn and \
-                        intrsctn.coordinates[1] <= current.coordinates[1] and\
-                        intrsctn.coordinates[0] != current.coordinates[0]:
-                        heappush(events, intrsctn)
-                        intrsctn = adjuster.hash_point(intrsctn)
-                        if intrsctn not in dict_seg:
-                            dict_seg[intrsctn] = [[], [sweep_seg_min, right], []]
-                        else:
-                            segments = dict_seg[intrsctn]
-                            if sweep_seg_min not in segments[1]:
-                                segments[1].append(sweep_seg_min)
-                            if right not in segments[1]:
-                                segments[1].append(right)
-            sweep_seg_max = sweep.index(max(segments[1]))
-            left = sweep_seg_max-1
-            if left >= 0:
-                sweep_seg_max = sweep[sweep_seg_max]
-                left = sweep[left]
-                intrsctn = sweep_seg_max.intersection_with(left)
-                if intrsctn is not None:
-                    intrsctn = adjuster.hash_point(intrsctn)
-                    if intrsctn and \
-                        intrsctn.coordinates[1] <= current.coordinates[1] and\
-                        intrsctn.coordinates[0] != current.coordinates[0]:
-                        heappush(events, intrsctn)
-                        intrsctn = adjuster.hash_point(intrsctn)
-                        if intrsctn not in dict_seg:
-                            dict_seg[intrsctn] = [[], [left, sweep_seg_max], []]
-                        else:
-                            segments = dict_seg[intrsctn]
-                            if sweep_seg_max not in segments[1]:
-                                segments[1].append(sweep_seg_max)
-                            if left not in segments[1]:
-                                segments[1].append(left)
+            inter_event(sweep, segments, results, events, adjuster, dict_seg, current, nb_coupes)
 
         if segments[0]: # in
-            while segments[0]:
-                segment = segments[0].pop()
-                sweep.add(segment)
-                i = sweep.index(segment)
-                left = i-1
-                if left >= 0:
-                    left = sweep[left]
-                    intrsctn = segment.intersection_with(left)
-                    if intrsctn and \
-                        intrsctn.coordinates[1] <= current.coordinates[1] and\
-                        intrsctn.coordinates[0] != current.coordinates[0]:
-                        intrsctn = adjuster.hash_point(intrsctn)
-                        heappush(events, intrsctn)
-                        if intrsctn not in dict_seg:
-                            dict_seg[intrsctn] = [[], [left, segment], []]
-                        else:
-                            segments = dict_seg[intrsctn]
-                            if left not in segments[1]:
-                                segments[1].append(left)
-                            if segment not in segments[1]:
-                                segments[1].append(segment)
-                right = i+1
-                if right < len(sweep):
-                    right = sweep[right]
-                    intrsctn = segment.intersection_with(right)
-                    if intrsctn and \
-                        intrsctn.coordinates[1] <= current.coordinates[1] and\
-                        intrsctn.coordinates[0] != current.coordinates[0]:
-                        intrsctn = adjuster.hash_point(intrsctn)
-                        heappush(events, intrsctn)
-                        if intrsctn not in dict_seg:
-                            dict_seg[intrsctn] = [[], [right, segment], []]
-                        else:
-                            segments = dict_seg[intrsctn]
-                            if right not in segments[1]:
-                                segments[1].append(right)
-                            if segment not in segments[1]:
-                                segments[1].append(segment)
+            in_event(sweep, segments, events, adjuster, dict_seg, current)
+
         if ENTER:
             input("Press [ENTER] to continue...\n")
     tycat(segments_origin, results)
