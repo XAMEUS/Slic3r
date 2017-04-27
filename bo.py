@@ -86,6 +86,50 @@ def test(filename):
         if segments[1]: # inter
             nb_coupes += 1
             results.append(current)
+            for segment in segments[1]:
+                sweep.remove(segment)
+            for segment in segments[1]:
+                sweep.add(segment)
+            u = sweep.index(max(segments[1]))
+            right = u+1
+            if right < len(sweep):
+                u = sweep[u]
+                right = sweep[right]
+                intrsctn = u.intersection_with(right)
+                if intrsctn is not None:
+                    intrsctn = adjuster.hash_point(intrsctn)
+                    if intrsctn and \
+                        intrsctn.coordinates[1] <= current.coordinates[1] and\
+                        intrsctn.coordinates[0] != current.coordinates[0]:
+                        heappush(events, intrsctn)
+                        intrsctn = adjuster.hash_point(intrsctn)
+                        if intrsctn not in dict_seg:
+                            dict_seg[intrsctn] = [[], [u, right], []]
+                        else:
+                            if u not in segments[1]:
+                                segments[1].append(u)
+                            if right not in segments[1]:
+                                segments[1].append(right)
+            v = sweep.index(min(segments[1]))
+            left = v-1
+            if left >= 0:
+                v = sweep[v]
+                left = sweep[left]
+                intrsctn = v.intersection_with(left)
+                if intrsctn is not None:
+                    intrsctn = adjuster.hash_point(intrsctn)
+                    if intrsctn and \
+                        intrsctn.coordinates[1] <= current.coordinates[1] and\
+                        intrsctn.coordinates[0] != current.coordinates[0]:
+                        heappush(events, intrsctn)
+                        intrsctn = adjuster.hash_point(intrsctn)
+                        if intrsctn not in dict_seg:
+                            dict_seg[intrsctn] = [[], [left, v], []]
+                        else:
+                            if v not in segments[1]:
+                                segments[1].append(v)
+                            if left not in segments[1]:
+                                segments[1].append(left)
 
         if segments[0]: # in
             while segments[0]:
