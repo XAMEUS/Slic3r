@@ -13,8 +13,8 @@ from sortedcontainers import SortedList
 from geo.tycat import tycat
 from geo.segment import load_segments, load_segments_stdin, Segment
 
-DEBUG = True
-ENTER = True
+DEBUG = False
+ENTER = False
 
 def load_events(segments_origin, events, dict_seg):
     """
@@ -48,86 +48,101 @@ def test(filename):
     """
     run bentley ottmann
     """
-    events = [] #Tas des événements: (point, type_d_evenement)
-    dict_seg = {} #Dictionnaire contenant les segments au point (point, type_d_evenement)
+    events = [] #Tas des événements: (point)
+    dict_seg = {} #Dictionnaire contenant les segments (in, out) au point en arg
     sweep = SortedList() #(Sorted)List des segments en vie
     results = [] #Les points finaux
-    nb_coupes = 0 #Si un point d'intersection apparait dans plusieurs segments,
-                    #il compte plusieurs fois
 
     adjuster, segments_origin = load_file(filename)
     Segment.adjuster = adjuster
     load_events(segments_origin, events, dict_seg)
 
     while events: #Traitement des événements
-        current = heappop(events)
-
-        segments = dict_seg[current]
-
-        Segment.point =  current
-
+        current = heappop(events) #On récupère le point à traiter
+        segments = dict_seg[current] #On récupèrer ses segments associés (in, out)
         if DEBUG:
             print("Current:", current, segments)
             print("Events:", events)
             print("SL:", len(sweep), sweep)
             tycat(segments_origin, results, current, sweep, segments[0], segments[1])
 
-        if segments[1]:
+        if segments[1]: #On traite les out
             for segment in segments[1]:
                 i = sweep.index(segment)
+                left, right = i - 1, i + 1
+                if left >= 0 and right < len(sweep):
+                    left, right = sweep[left], sweep[right]
+                    intrsctn = left.intersection_with(right)
+                    if intrsctn:
+                        intrsctn = adjuster.hash_point(intrsctn)
+                    if intrsctn and intrsctn not in results: # Intersection non-nulle et nouvelle
+                        results.append(intrsctn)
+                        heappush(events, intrsctn)
+                        if intrsctn not in dict_seg:
+                            dict_seg[intrsctn] = [[], []]
+                        tmp = dict_seg[intrsctn]
+                        tmp[0].append(left)
+                        tmp[1].append(left)
+                        tmp[0].append(right)
+                        tmp[1].append(right)
+
                 sweep.remove(segment)
 
-        Segment.point = current
+        Segment.point = current #On actualise le point: pt de référence
 
-        if segments[0]:
+        if segments[0]: #On traite les in
             for segment in segments[0]:
                 sweep.add(segment)
                 i = sweep.index(segment)
-                left = i-1
+
+                #On traite à gauche
+                left = i - 1
                 if left >= 0:
                     left = sweep[left]
                     intrsctn = segment.intersection_with(left)
-                    if intrsctn and \
-                        intrsctn.coordinates[1] <= current.coordinates[1] and\
-                        intrsctn.coordinates[0] != current.coordinates[0]:
+                    if intrsctn:
                         intrsctn = adjuster.hash_point(intrsctn)
-                        Segment.point = intrsctn
-                        sweep.remove(left)
-                        if segment in sweep:
-                            sweep.remove(segment)
+                    if intrsctn and intrsctn not in results: # Intersection non-nulle et nouvelle
                         results.append(intrsctn)
-                        sweep.add(left)
-                        sweep.add(segment)
+                        heappush(events, intrsctn)
+                        if intrsctn not in dict_seg:
+                            dict_seg[intrsctn] = [[], []]
+                        tmp = dict_seg[intrsctn]
+                        tmp[0].append(segment)
+                        tmp[1].append(segment)
+                        tmp[0].append(left)
+                        tmp[1].append(left)
 
+                #Idem à droite
                 right = i + 1
                 if right < len(sweep):
                     right = sweep[right]
                     intrsctn = segment.intersection_with(right)
-                    if intrsctn and \
-                        intrsctn.coordinates[1] <= current.coordinates[1] and\
-                        intrsctn.coordinates[0] != current.coordinates[0]:
+                    if intrsctn:
                         intrsctn = adjuster.hash_point(intrsctn)
-                        Segment.point = intrsctn
-                        sweep.remove(right)
-                        if segment in sweep:
-                            sweep.remove(segment)
+                    if intrsctn and intrsctn not in results:
                         results.append(intrsctn)
-                        sweep.add(right)
-                        sweep.add(segment)
-
+                        heappush(events, intrsctn)
+                        if intrsctn not in dict_seg:
+                            dict_seg[intrsctn] = [[], []]
+                        tmp = dict_seg[intrsctn]
+                        tmp[0].append(segment)
+                        tmp[1].append(segment)
+                        tmp[0].append(right)
+                        tmp[1].append(right)
         if DEBUG:
             print("Current:", current, segments)
             print("Events:", events)
             print("SL:", len(sweep), sweep)
             print(results)
-            tycat(segments_origin, results, current, sweep)
+        tycat(segments_origin, results, current, sweep)
         if ENTER:
             input("Press [ENTER] to continue...\n")
     tycat(segments_origin, results)
     if ENTER:
         input("Press [ENTER] to continue...\n")
-    print("le nombre d'intersections (= le nombre de points differents) est", len(results))
-    print("le nombre de coupes dans les segments est", nb_coupes)
+    # print("le nombre d'intersections (= le nombre de points differents) est", len(results))
+    # print("le nombre de coupes dans les segments est", nb_coupes)
 
 def main():
     """
@@ -138,4 +153,5 @@ def main():
     for filename in sys.argv[1:]:
         test(filename)
 
-main()
+if __name__ == '__main__':
+    main()
