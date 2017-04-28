@@ -205,4 +205,5 @@ def main():
     for filename in sys.argv[1:]:
         test(filename)
 
-main()
+if __name__ == '__main__':
+    main()
