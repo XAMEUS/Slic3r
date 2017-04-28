@@ -89,7 +89,7 @@ def tycat(*things):
     for string in svg_strings:
         svg_file.write(string)
     display.close_svg(svg_file)
-    os.system("tycat {}".format(filename))
+    os.system("tycat {} 2>/dev/null".format(filename))
 
 
 def compute_displays(things):
