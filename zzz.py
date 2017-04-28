@@ -11,7 +11,7 @@ import sys
 from heapq import heappush, heappop
 from sortedcontainers import SortedList
 from geo.tycat import tycat
-from geo.segment import load_segments, load_segments_stdin, Segment
+from geo.segment import load_segments, load_segments_stdin, Segment, key
 
 DEBUG = True
 ENTER = True
@@ -22,16 +22,14 @@ def load_events(segments_origin, events, dict_seg):
     """
     for segment in segments_origin: #On ajoute les événements adéquats
         pt_min, pt_max = min(segment.endpoints), max(segment.endpoints)
-        heappush(events, pt_min)
-        heappush(events, pt_max)
-        if pt_min in dict_seg:
-            dict_seg[pt_min][0].append(segment)
-        else:
-            dict_seg[pt_min] = [[segment], []]
-        if pt_max in dict_seg:
-            dict_seg[pt_max][1].append(segment)
-        else:
-            dict_seg[pt_max] = [[], [segment]]
+        if pt_min not in dict_seg:
+            heappush(events, pt_min)
+            dict_seg[pt_min] = [set(), set()]
+        dict_seg[pt_min][0].add(segment)
+        if pt_max not in dict_seg:
+            heappush(events, pt_max)
+            dict_seg[pt_max] = [set(), set()]
+        dict_seg[pt_max][1].add(segment)
 
 def load_file(filename):
     """
@@ -65,6 +63,7 @@ def test(filename):
             print("Events:", events)
             print("SL:", len(sweep), sweep)
             tycat(segments_origin, results, current, sweep, segments[0], segments[1])
+            print("###############")
 
         if segments[1]: #On traite les out
             while segments[1]:
@@ -81,14 +80,16 @@ def test(filename):
                         results.append(intrsctn)
                         heappush(events, intrsctn)
                         if intrsctn not in dict_seg:
-                            dict_seg[intrsctn] = [[], []]
+                            dict_seg[intrsctn] = [set(), set(   )]
                         tmp = dict_seg[intrsctn]
-                        tmp[0].append(left)
-                        tmp[1].append(left)
-                        tmp[0].append(right)
-                        tmp[1].append(right)
+                        tmp[0].add(left)
+                        tmp[1].add(left)
+                        tmp[0].add(right)
+                        tmp[1].add(right)
                 sweep.remove(segment)
+                tycat(segments_origin, results, current, sweep, segment)
 
+        print("######", current)
         Segment.point = current #On actualise le point: pt de référence
 
         if segments[0]: #On traite les in
@@ -108,12 +109,12 @@ def test(filename):
                         results.append(intrsctn)
                         heappush(events, intrsctn)
                         if intrsctn not in dict_seg:
-                            dict_seg[intrsctn] = [[], []]
+                            dict_seg[intrsctn] = [set(), set()]
                         tmp = dict_seg[intrsctn]
-                        tmp[0].append(segment)
-                        tmp[1].append(segment)
-                        tmp[0].append(left)
-                        tmp[1].append(left)
+                        tmp[0].add(segment)
+                        tmp[1].add(segment)
+                        tmp[0].add(left)
+                        tmp[1].add(left)
 
                 #Idem à droite
                 right = i + 1
@@ -126,12 +127,13 @@ def test(filename):
                         results.append(intrsctn)
                         heappush(events, intrsctn)
                         if intrsctn not in dict_seg:
-                            dict_seg[intrsctn] = [[], []]
+                            dict_seg[intrsctn] = [set(), set()]
                         tmp = dict_seg[intrsctn]
-                        tmp[0].append(segment)
-                        tmp[1].append(segment)
-                        tmp[0].append(right)
-                        tmp[1].append(right)
+                        tmp[0].add(segment)
+                        tmp[1].add(segment)
+                        tmp[0].add(right)
+                        tmp[1].add(right)
+                tycat(segments_origin, results, current, sweep, segment)
         if DEBUG:
             print("Current:", current, segments)
             print("Events:", events)
