@@ -32,6 +32,7 @@ def test(filename):
     else:
         adjuster, segments_origin = load_segments_stdin()
     tycat(segments_origin)
+    Segment.adjuster = adjuster
 
     for segment in segments_origin: #On ajoute les événements adéquats
 

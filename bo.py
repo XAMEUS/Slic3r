@@ -57,6 +57,7 @@ def test(filename):
 
     adjuster, segments_origin = load_file(filename)
     load_events(segments_origin, events, dict_seg)
+    Segment.adjuster = adjuster
 
 
     while events: #Traitement des événements

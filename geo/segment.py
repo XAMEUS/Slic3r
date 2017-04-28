@@ -29,6 +29,7 @@ class Segment:
     """
 
     point = Point([0, 0])
+    adjuster = None
 
     def __init__(self, points):
         """
@@ -146,7 +147,8 @@ def compute_x(segment, current):
     x_pt, y_pt = current.coordinates
     if y_0 == y_1:
         return x_pt
-    return x_0 + (y_pt - y_0) * (x_1 - x_0) / (y_1 - y_0)
+    x_new = x_0 + (y_pt - y_0) * (x_1 - x_0) / (y_1 - y_0)
+    return Segment.adjuster.hash_point(Point([x_new, y_pt])).coordinates[0]
 
 def load_segments(filename):
     """
