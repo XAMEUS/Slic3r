@@ -13,8 +13,8 @@ from sortedcontainers import SortedList
 from geo.tycat import tycat
 from geo.segment import load_segments, load_segments_stdin, Segment
 
-DEBUG = False
-ENTER = False
+DEBUG = True
+ENTER = True
 
 def load_events(segments_origin, events, dict_seg):
     """
@@ -67,7 +67,9 @@ def test(filename):
             tycat(segments_origin, results, current, sweep, segments[0], segments[1])
 
         if segments[1]: #On traite les out
-            for segment in segments[1]:
+            while segments[1]:
+                segment = segments[1].pop()
+                print("SW", sweep, segment)
                 i = sweep.index(segment)
                 left, right = i - 1, i + 1
                 if left >= 0 and right < len(sweep):
@@ -85,13 +87,13 @@ def test(filename):
                         tmp[1].append(left)
                         tmp[0].append(right)
                         tmp[1].append(right)
-
                 sweep.remove(segment)
 
         Segment.point = current #On actualise le point: pt de référence
 
         if segments[0]: #On traite les in
-            for segment in segments[0]:
+            while segments[0]:
+                segment = segments[0].pop()
                 sweep.add(segment)
                 i = sweep.index(segment)
 
