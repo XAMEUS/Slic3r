@@ -11,7 +11,7 @@ import sys
 from heapq import heappush, heappop
 from sortedcontainers import SortedList
 from geo.tycat import tycat
-from geo.segment import load_segments, load_segments_stdin
+from geo.segment import load_segments, load_segments_stdin, Segment
 
 DEBUG = False
 ENTER = False
@@ -42,6 +42,7 @@ def load_file(filename):
     else:
         adjuster, segments_origin = load_segments_stdin()
     tycat(segments_origin)
+    Segment.adjuster = adjuster
     return adjuster, segments_origin
 
 def test(filename):
@@ -104,4 +105,5 @@ def main():
     for filename in sys.argv[1:]:
         test(filename)
 
-main()
+if __name__ == '__main__':
+    main()
