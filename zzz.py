@@ -22,16 +22,16 @@ def load_events(segments_origin, events, dict_seg):
     """
     for segment in segments_origin: #On ajoute les événements adéquats
         pt_min, pt_max = min(segment.endpoints), max(segment.endpoints)
-        heappush(events, pt_min)
-        heappush(events, pt_max)
         if pt_min in dict_seg:
-            dict_seg[pt_min][0].append(segment)
+            dict_seg[pt_min][0].add(segment)
         else:
-            dict_seg[pt_min] = [[segment], []]
+            heappush(events, pt_min)
+            dict_seg[pt_min] = [{segment}, set()]
         if pt_max in dict_seg:
-            dict_seg[pt_max][1].append(segment)
+            dict_seg[pt_max][1].add(segment)
         else:
-            dict_seg[pt_max] = [[], [segment]]
+            heappush(events, pt_max)
+            dict_seg[pt_max] = [set(), {segment}]
 
 def load_file(filename):
     """
@@ -81,12 +81,12 @@ def test(filename):
                         results.append(intrsctn)
                         heappush(events, intrsctn)
                         if intrsctn not in dict_seg:
-                            dict_seg[intrsctn] = [[], []]
+                            dict_seg[intrsctn] = [set(), set()]
                         tmp = dict_seg[intrsctn]
-                        tmp[0].append(left)
-                        tmp[1].append(left)
-                        tmp[0].append(right)
-                        tmp[1].append(right)
+                        tmp[0].add(left)
+                        tmp[1].add(left)
+                        tmp[0].add(right)
+                        tmp[1].add(right)
                 sweep.remove(segment)
 
         Segment.point = current #On actualise le point: pt de référence
@@ -108,12 +108,12 @@ def test(filename):
                         results.append(intrsctn)
                         heappush(events, intrsctn)
                         if intrsctn not in dict_seg:
-                            dict_seg[intrsctn] = [[], []]
+                            dict_seg[intrsctn] = [set(), set()]
                         tmp = dict_seg[intrsctn]
-                        tmp[0].append(segment)
-                        tmp[1].append(segment)
-                        tmp[0].append(left)
-                        tmp[1].append(left)
+                        tmp[0].add(segment)
+                        tmp[1].add(segment)
+                        tmp[0].add(left)
+                        tmp[1].add(left)
 
                 #Idem à droite
                 right = i + 1
@@ -126,12 +126,12 @@ def test(filename):
                         results.append(intrsctn)
                         heappush(events, intrsctn)
                         if intrsctn not in dict_seg:
-                            dict_seg[intrsctn] = [[], []]
+                            dict_seg[intrsctn] = [set(), set()]
                         tmp = dict_seg[intrsctn]
-                        tmp[0].append(segment)
-                        tmp[1].append(segment)
-                        tmp[0].append(right)
-                        tmp[1].append(right)
+                        tmp[0].add(segment)
+                        tmp[1].add(segment)
+                        tmp[0].add(right)
+                        tmp[1].add(right)
         if DEBUG:
             print("Current:", current, segments)
             print("Events:", events)
