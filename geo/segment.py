@@ -44,7 +44,7 @@ class Segment:
             self.angle = pi/2
         else:
             self.angle = ((delta_x > 0 and delta_y < 0) or
-                          (delta_x < 0 and delta_y > 0)) * pi - atan(delta_y / delta_x)
+                          (delta_x < 0 and delta_y > 0)) * pi + atan(delta_y / delta_x)
 
     def __lt__(self, o):
         return key(self, Segment.point) < key(o, Segment.point)
