@@ -44,6 +44,22 @@ def load_file(filename):
     tycat(segments_origin)
     return adjuster, segments_origin
 
+def intersect_process(intrsctn, results, dict_seg, events, left, right):
+    """
+    When we have a intersection
+    """
+    if intrsctn not in results: # Intersection non-nulle et nouvelle
+        results.append(intrsctn)
+        if intrsctn not in dict_seg:
+            heappush(events, intrsctn)
+            dict_seg[intrsctn] = [set(), set()]
+        tmp = dict_seg[intrsctn]
+        tmp[0].add(left)
+        tmp[1].add(left)
+        tmp[0].add(right)
+        tmp[1].add(right)
+
+
 def test(filename):
     """
     run bentley ottmann
@@ -88,16 +104,7 @@ def test(filename):
                     intrsctn = left.intersection_with(right)
                     if intrsctn:
                         intrsctn = adjuster.hash_point(intrsctn)
-                    if intrsctn and intrsctn not in results: # Intersection non-nulle et nouvelle
-                        results.append(intrsctn)
-                        if intrsctn not in dict_seg:
-                            heappush(events, intrsctn)
-                            dict_seg[intrsctn] = [set(), set()]
-                        tmp = dict_seg[intrsctn]
-                        tmp[0].add(left)
-                        tmp[1].add(left)
-                        tmp[0].add(right)
-                        tmp[1].add(right)
+                        intersect_process(intrsctn, results, dict_seg, events, left, right)
                 sweep.remove(segment)
                 if MORE or count in STOP:
                     tycat(segments_origin, results, current, sweep, segment)
@@ -126,16 +133,7 @@ def test(filename):
                     intrsctn = segment.intersection_with(left)
                     if intrsctn:
                         intrsctn = adjuster.hash_point(intrsctn)
-                    if intrsctn and intrsctn not in results: # Intersection non-nulle et nouvelle
-                        results.append(intrsctn)
-                        if intrsctn not in dict_seg:
-                            heappush(events, intrsctn)
-                            dict_seg[intrsctn] = [set(), set()]
-                        tmp = dict_seg[intrsctn]
-                        tmp[0].add(segment)
-                        tmp[1].add(segment)
-                        tmp[0].add(left)
-                        tmp[1].add(left)
+                        intersect_process(intrsctn, results, dict_seg, events, segment, left)
 
                 #Idem à droite
                 right = i + 1
@@ -144,16 +142,7 @@ def test(filename):
                     intrsctn = segment.intersection_with(right)
                     if intrsctn:
                         intrsctn = adjuster.hash_point(intrsctn)
-                    if intrsctn and intrsctn not in results:
-                        results.append(intrsctn)
-                        if intrsctn not in dict_seg:
-                            heappush(events, intrsctn)
-                            dict_seg[intrsctn] = [set(), set()]
-                        tmp = dict_seg[intrsctn]
-                        tmp[0].add(segment)
-                        tmp[1].add(segment)
-                        tmp[0].add(right)
-                        tmp[1].add(right)
+                        intersect_process(intrsctn, results, dict_seg, events, segment, right)
                 if MORE or count in STOP:
                     tycat(segments_origin, results, current, sweep, segment)
 
