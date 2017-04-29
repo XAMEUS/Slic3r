@@ -16,6 +16,7 @@ from geo.segment import load_segments, load_segments_stdin, Segment, key
 DEBUG = False
 ENTER = False
 MORE = False
+STOP = [0, 412, 413]
 
 def load_events(segments_origin, events, dict_seg):
     """
@@ -56,10 +57,13 @@ def test(filename):
     Segment.adjuster = adjuster
     load_events(segments_origin, events, dict_seg)
 
+    count = 0
+
     while events: #Traitement des événements
+        count += 1
         current = heappop(events) #On récupère le point à traiter
         segments = dict_seg[current] #On récupèrer ses segments associés (in, out)
-        if DEBUG:
+        if DEBUG or count in STOP:
             print("Current:", current, segments)
             print("Events:", events)
             print("SL:", len(sweep), sweep)
@@ -70,7 +74,7 @@ def test(filename):
             while segments[1]:
                 segment = segments[1].pop()
                 # DEBUG
-                if MORE:
+                if MORE or count in STOP:
                     print("{")
                     for s in sweep: # AFFICHE LES COUPLES (KEY, SEGMENT)
                         print("\t-", key(s, current), s)
@@ -94,10 +98,10 @@ def test(filename):
                         tmp[0].add(right)
                         tmp[1].add(right)
                 sweep.remove(segment)
-                if MORE:
+                if MORE or count in STOP:
                     tycat(segments_origin, results, current, sweep, segment)
 
-        if MORE:
+        if MORE or count in STOP:
             print("###### IN", current)
         Segment.point = current #On actualise le point: pt de référence
 
@@ -106,7 +110,7 @@ def test(filename):
                 segment = segments[0].pop()
                 sweep.add(segment)
                 # DEBUG
-                if MORE:
+                if MORE or count in STOP:
                     print("{")
                     for s in sweep:
                         print("\t-", key(s, current), s)
@@ -149,20 +153,20 @@ def test(filename):
                         tmp[1].add(segment)
                         tmp[0].add(right)
                         tmp[1].add(right)
-                if MORE:
+                if MORE or count in STOP:
                     tycat(segments_origin, results, current, sweep, segment)
         # DEBUG : A T ON CASSE SWEEP ?
         tmp = [s for s in sweep]
         stmp = sorted(tmp)
         if tmp != stmp:
-            print("!!!!!!!!SWEEP CASSE!!!!!!!!!")
+            print("!!!!!!!!SWEEP CASSE!!!!!!!!! : [", count, "]")
             print("{")
             for s in sweep:
                 print("\t-", key(s, current), s)
             print("}")
             break
         # END DEBUG
-        if DEBUG:
+        if DEBUG or count in STOP:
             print("Current:", current, segments)
             print("Events:", events)
             print("SL:", len(sweep), sweep)
