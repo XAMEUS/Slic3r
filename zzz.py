@@ -16,7 +16,7 @@ from geo.segment import load_segments, load_segments_stdin, Segment, key
 DEBUG = False
 ENTER = False
 MORE = False
-STOP = [0, 412, 413]
+STOP = []
 
 def load_events(segments_origin, events, dict_seg):
     """
@@ -61,6 +61,7 @@ def test(filename):
 
     while events: #Traitement des événements
         count += 1
+        print(count)
         current = heappop(events) #On récupère le point à traiter
         segments = dict_seg[current] #On récupèrer ses segments associés (in, out)
         if DEBUG or count in STOP:
@@ -155,24 +156,7 @@ def test(filename):
                         tmp[1].add(right)
                 if MORE or count in STOP:
                     tycat(segments_origin, results, current, sweep, segment)
-        # DEBUG : A T ON CASSE SWEEP ?
-        tmp = [s for s in sweep]
-        stmp = sorted(tmp)
-        if tmp != stmp:
-            for i in range(1, len(sweep) - 1):
-                if key(sweep[i-1], current) > key(sweep[i], current):
-                    print(key(sweep[i-1], current), sweep[i-1])
-                    print(key(sweep[i], current), sweep[i])
-                    print(key(sweep[i+1], current), sweep[i+1])
-                    tycat(segments_origin, sweep[i], (sweep[i-1], sweep[i+1]))
 
-            print("!!!!!!!!SWEEP CASSE!!!!!!!!! : [", count, "]")
-            print("{")
-            for s in sweep:
-                print("\t-", key(s, current), s)
-            print("}")
-            break
-        # END DEBUG
         if DEBUG or count in STOP:
             print("Current:", current, segments)
             print("Events:", events)
