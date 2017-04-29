@@ -44,21 +44,20 @@ def load_file(filename):
     tycat(segments_origin)
     return adjuster, segments_origin
 
-def intersect_process(intrsctn, results, dict_seg, events, left, right):
+def intersect_process(intrsctn, results, dict_seg, events, to_add):
     """
     When we have a intersection
     """
     if intrsctn not in results: # Intersection non-nulle et nouvelle
         results.append(intrsctn)
+        # intrsctn.coordinates[0] = float("inf")
         if intrsctn not in dict_seg:
             heappush(events, intrsctn)
             dict_seg[intrsctn] = [set(), set()]
         tmp = dict_seg[intrsctn]
-        tmp[0].add(left)
-        tmp[1].add(left)
-        tmp[0].add(right)
-        tmp[1].add(right)
-
+        for elem in to_add:
+            tmp[0].add(elem)
+            tmp[1].add(elem)
 
 def test(filename):
     """
@@ -93,8 +92,8 @@ def test(filename):
                 # DEBUG
                 if MORE or count in STOP:
                     print("{")
-                    for s in sweep: # AFFICHE LES COUPLES (KEY, SEGMENT)
-                        print("\t-", key(s, current), s)
+                    for tmp in sweep: # AFFICHE LES COUPLES (KEY, SEGMENT)
+                        print("\t-", key(tmp, current), tmp)
                     print("}")
                 # END DEBUG
                 i = sweep.index(segment)
@@ -104,7 +103,7 @@ def test(filename):
                     intrsctn = left.intersection_with(right)
                     if intrsctn:
                         intrsctn = adjuster.hash_point(intrsctn)
-                        intersect_process(intrsctn, results, dict_seg, events, left, right)
+                        intersect_process(intrsctn, results, dict_seg, events, [left, right])
                 sweep.remove(segment)
                 if MORE or count in STOP:
                     tycat(segments_origin, results, current, sweep, segment)
@@ -120,8 +119,8 @@ def test(filename):
                 # DEBUG
                 if MORE or count in STOP:
                     print("{")
-                    for s in sweep:
-                        print("\t-", key(s, current), s)
+                    for tmp in sweep:
+                        print("\t-", key(tmp, current), tmp)
                     print("}")
                 i = sweep.index(segment)
                 # END DEBUG
@@ -133,7 +132,7 @@ def test(filename):
                     intrsctn = segment.intersection_with(left)
                     if intrsctn:
                         intrsctn = adjuster.hash_point(intrsctn)
-                        intersect_process(intrsctn, results, dict_seg, events, segment, left)
+                        intersect_process(intrsctn, results, dict_seg, events, [segment, left])
 
                 #Idem à droite
                 right = i + 1
@@ -142,7 +141,7 @@ def test(filename):
                     intrsctn = segment.intersection_with(right)
                     if intrsctn:
                         intrsctn = adjuster.hash_point(intrsctn)
-                        intersect_process(intrsctn, results, dict_seg, events, segment, right)
+                        intersect_process(intrsctn, results, dict_seg, events, [segment, right])
                 if MORE or count in STOP:
                     tycat(segments_origin, results, current, sweep, segment)
 
