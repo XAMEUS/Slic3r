@@ -13,8 +13,9 @@ from sortedcontainers import SortedList
 from geo.tycat import tycat
 from geo.segment import load_segments, load_segments_stdin, Segment, key
 
-DEBUG = True
-ENTER = True
+DEBUG = False
+ENTER = False
+MORE = False
 
 def load_events(segments_origin, events, dict_seg):
     """
@@ -69,10 +70,11 @@ def test(filename):
             while segments[1]:
                 segment = segments[1].pop()
                 # DEBUG
-                print("{")
-                for s in sweep: # AFFICHE LES COUPLES (KEY, SEGMENT)
-                    print("\t-", key(s, current), s)
-                print("}")
+                if MORE:
+                    print("{")
+                    for s in sweep: # AFFICHE LES COUPLES (KEY, SEGMENT)
+                        print("\t-", key(s, current), s)
+                    print("}")
                 # END DEBUG
                 i = sweep.index(segment)
                 left, right = i - 1, i + 1
@@ -92,9 +94,11 @@ def test(filename):
                         tmp[0].add(right)
                         tmp[1].add(right)
                 sweep.remove(segment)
-                tycat(segments_origin, results, current, sweep, segment)
+                if MORE:
+                    tycat(segments_origin, results, current, sweep, segment)
 
-        print("###### IN", current)
+        if MORE:
+            print("###### IN", current)
         Segment.point = current #On actualise le point: pt de référence
 
         if segments[0]: #On traite les in
@@ -102,10 +106,11 @@ def test(filename):
                 segment = segments[0].pop()
                 sweep.add(segment)
                 # DEBUG
-                print("{")
-                for s in sweep:
-                    print("\t-", key(s, current), s)
-                print("}")
+                if MORE:
+                    print("{")
+                    for s in sweep:
+                        print("\t-", key(s, current), s)
+                    print("}")
                 i = sweep.index(segment)
                 # END DEBUG
 
@@ -144,11 +149,13 @@ def test(filename):
                         tmp[1].add(segment)
                         tmp[0].add(right)
                         tmp[1].add(right)
-                tycat(segments_origin, results, current, sweep, segment)
+                if MORE:
+                    tycat(segments_origin, results, current, sweep, segment)
         # DEBUG : A T ON CASSE SWEEP ?
         tmp = [s for s in sweep]
         stmp = sorted(tmp)
         if tmp != stmp:
+            print("!!!!!!!!SWEEP CASSE!!!!!!!!!")
             print("{")
             for s in sweep:
                 print("\t-", key(s, current), s)
@@ -160,7 +167,7 @@ def test(filename):
             print("Events:", events)
             print("SL:", len(sweep), sweep)
             print(results)
-        tycat(segments_origin, results, current, sweep)
+            tycat(segments_origin, results, current, sweep)
         if ENTER:
             input("Press [ENTER] to continue...\n")
     tycat(segments_origin, results)
