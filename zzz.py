@@ -161,7 +161,7 @@ def test(filename):
         if tmp != stmp:
             for i, j in zip(tmp, stmp):
                 if( i != j):
-                    tycat(segments_origin, results, current, sweep, i, j)
+                    tycat(segments_origin, [i, j])
 
             print("!!!!!!!!SWEEP CASSE!!!!!!!!! : [", count, "]")
             print("{")
