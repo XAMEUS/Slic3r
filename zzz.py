@@ -50,11 +50,13 @@ def intersect_process(intrsctn, results, dict_seg, events, to_add):
     """
     if intrsctn not in results: # Intersection non-nulle et nouvelle
         results.append(intrsctn)
-        # intrsctn.coordinates[0] = float("inf")
-        if intrsctn not in dict_seg:
-            heappush(events, intrsctn)
-            dict_seg[intrsctn] = [set(), set()]
-        tmp = dict_seg[intrsctn]
+        n_inter = intrsctn.copy()
+        n_inter.coordinates[0] = float("inf")
+        print(n_inter, intrsctn)
+        if n_inter not in dict_seg:
+            heappush(events, n_inter)
+            dict_seg[n_inter] = [set(), set()]
+        tmp = dict_seg[n_inter]
         for elem in to_add:
             tmp[0].add(elem)
             tmp[1].add(elem)
