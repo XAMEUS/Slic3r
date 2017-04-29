@@ -134,8 +134,12 @@ def key(segment, current):
     """
     Return the key of the segment, from the current point
     """
-    x_clef = compute_x(segment, current)
-    return (x_clef, segment.angle * (1 - 2 * (current.coordinates[0] > x_clef)))
+    if current.coordinates[0] != float("inf"):
+        x_clef = compute_x(segment, current)
+        return (x_clef, segment.angle * (1 - 2 * (current.coordinates[0] > x_clef)))
+    else:
+        x_clef = compute_x(segment, Point([0, current.coordinates[1]]))
+        return (x_clef, segment.angle * (1 - 2 * (x_clef < 0)))
 
 @lru_cache(maxsize=32768)
 def compute_x(segment, current):
