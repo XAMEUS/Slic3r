@@ -159,6 +159,10 @@ def test(filename):
         tmp = [s for s in sweep]
         stmp = sorted(tmp)
         if tmp != stmp:
+            for i, j in zip(tmp, stmp):
+                if( i != j):
+                    tycat(segments_origin, results, current, sweep, i, j)
+
             print("!!!!!!!!SWEEP CASSE!!!!!!!!! : [", count, "]")
             print("{")
             for s in sweep:
