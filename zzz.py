@@ -68,7 +68,12 @@ def test(filename):
         if segments[1]: #On traite les out
             while segments[1]:
                 segment = segments[1].pop()
-                print("SW", sweep, segment)
+                # DEBUG
+                print("{")
+                for s in sweep: # AFFICHE LES COUPLES (KEY, SEGMENT)
+                    print("\t-", key(s, current), s)
+                print("}")
+                # END DEBUG
                 i = sweep.index(segment)
                 left, right = i - 1, i + 1
                 if left >= 0 and right < len(sweep):
@@ -78,9 +83,9 @@ def test(filename):
                         intrsctn = adjuster.hash_point(intrsctn)
                     if intrsctn and intrsctn not in results: # Intersection non-nulle et nouvelle
                         results.append(intrsctn)
-                        heappush(events, intrsctn)
                         if intrsctn not in dict_seg:
-                            dict_seg[intrsctn] = [set(), set(   )]
+                            heappush(events, intrsctn)
+                            dict_seg[intrsctn] = [set(), set()]
                         tmp = dict_seg[intrsctn]
                         tmp[0].add(left)
                         tmp[1].add(left)
@@ -89,14 +94,20 @@ def test(filename):
                 sweep.remove(segment)
                 tycat(segments_origin, results, current, sweep, segment)
 
-        print("######", current)
+        print("###### IN", current)
         Segment.point = current #On actualise le point: pt de référence
 
         if segments[0]: #On traite les in
             while segments[0]:
                 segment = segments[0].pop()
                 sweep.add(segment)
+                # DEBUG
+                print("{")
+                for s in sweep:
+                    print("\t-", key(s, current), s)
+                print("}")
                 i = sweep.index(segment)
+                # END DEBUG
 
                 #On traite à gauche
                 left = i - 1
@@ -107,8 +118,8 @@ def test(filename):
                         intrsctn = adjuster.hash_point(intrsctn)
                     if intrsctn and intrsctn not in results: # Intersection non-nulle et nouvelle
                         results.append(intrsctn)
-                        heappush(events, intrsctn)
                         if intrsctn not in dict_seg:
+                            heappush(events, intrsctn)
                             dict_seg[intrsctn] = [set(), set()]
                         tmp = dict_seg[intrsctn]
                         tmp[0].add(segment)
@@ -125,8 +136,8 @@ def test(filename):
                         intrsctn = adjuster.hash_point(intrsctn)
                     if intrsctn and intrsctn not in results:
                         results.append(intrsctn)
-                        heappush(events, intrsctn)
                         if intrsctn not in dict_seg:
+                            heappush(events, intrsctn)
                             dict_seg[intrsctn] = [set(), set()]
                         tmp = dict_seg[intrsctn]
                         tmp[0].add(segment)
@@ -134,6 +145,16 @@ def test(filename):
                         tmp[0].add(right)
                         tmp[1].add(right)
                 tycat(segments_origin, results, current, sweep, segment)
+        # DEBUG : A T ON CASSE SWEEP ?
+        tmp = [s for s in sweep]
+        stmp = sorted(tmp)
+        if tmp != stmp:
+            print("{")
+            for s in sweep:
+                print("\t-", key(s, current), s)
+            print("}")
+            break
+        # END DEBUG
         if DEBUG:
             print("Current:", current, segments)
             print("Events:", events)
