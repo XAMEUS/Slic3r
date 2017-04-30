@@ -53,20 +53,23 @@ def load_file(filename):
     tycat(segments_origin)
     return adjuster, segments_origin
 
-def intersect_process(intrsctn, results, dict_seg, events, to_add):
+def test_intersect(results, dict_seg, events, adjuster, current, order):
     """
-    When we have a intersection
+    Have we a intersection ? If yes, we do the necessary
     """
-    if intrsctn not in results: # Intersection non-nulle et nouvelle
-        results.append(intrsctn)
-        if intrsctn not in dict_seg:
-            heappush(events, intrsctn)
-            dict_seg[intrsctn] = [set(), set()]
-        tmp = dict_seg[intrsctn]
-        for elem in to_add:
-            if elem not in tmp[1]:
-                tmp[0].add(elem)
-            tmp[1].add(elem)
+    intrsctn = order[0].intersection_with(order[1])
+    if intrsctn and intrsctn != current:
+        intrsctn = adjuster.hash_point(intrsctn)
+        if intrsctn not in results: # Intersection non-nulle et nouvelle
+            results.append(intrsctn)
+            if intrsctn not in dict_seg:
+                heappush(events, intrsctn)
+                dict_seg[intrsctn] = [set(), set()]
+            tmp = dict_seg[intrsctn]
+            for elem in order:
+                if elem not in tmp[1]:
+                    tmp[0].add(elem)
+                tmp[1].add(elem)
 
 def test(filename):
     """
@@ -123,11 +126,8 @@ def test(filename):
 
                 debug_print(("default i =", i), DEBUG)
                 if left >= 0 and right < len(sweep):
-                    left, right = sweep[left], sweep[right]
-                    intrsctn = left.intersection_with(right)
-                    if intrsctn and intrsctn != current:
-                        intrsctn = adjuster.hash_point(intrsctn)
-                        intersect_process(intrsctn, results, dict_seg, events, [left, right])
+                    test_intersect(results, dict_seg, events, adjuster, current,
+                                   [sweep[left], sweep[right]])
 
                 # DEBUG
                 debug_print(("del i =", i), DEBUG)
@@ -173,19 +173,13 @@ def test(filename):
                 debug_print(("left:", left, ", right:", right), DEBUG)
                 #On traite à gauche
                 if left >= 0:
-                    left = sweep[left]
-                    intrsctn = segment.intersection_with(left)
-                    if intrsctn and intrsctn != current:
-                        intrsctn = adjuster.hash_point(intrsctn)
-                        intersect_process(intrsctn, results, dict_seg, events, [segment, left])
+                    test_intersect(results, dict_seg, events, adjuster, current,
+                                   [segment, sweep[left]])
 
                 #Idem à droite
                 if right < len(sweep):
-                    right = sweep[right]
-                    intrsctn = segment.intersection_with(right)
-                    if intrsctn and intrsctn != current:
-                        intrsctn = adjuster.hash_point(intrsctn)
-                        intersect_process(intrsctn, results, dict_seg, events, [segment, right])
+                    test_intersect(results, dict_seg, events, adjuster, current,
+                                   [segment, sweep[right]])
                 #print(segments[0])
 
         if DEBUG or count in STOP:
