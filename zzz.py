@@ -63,7 +63,6 @@ def intersect_process(intrsctn, results, dict_seg, events, to_add):
     """
     if intrsctn not in results: # Intersection non-nulle et nouvelle
         results.append(intrsctn)
-        # intrsctn.coordinates[0] = float("inf")
         if intrsctn not in dict_seg:
             heappush(events, intrsctn)
             dict_seg[intrsctn] = [set(), set()]
@@ -217,8 +216,8 @@ def test(filename):
     tycat(segments_origin, results)
     if PAUSE:
         input("Press [ENTER] to continue...\n")
-    # print("le nombre d'intersections (= le nombre de points differents) est", len(results))
-    # print("le nombre de coupes dans les segments est", nb_coupes)
+    print("le nombre d'intersections (= le nombre de points differents) est", len(set(results)))
+    print("le nombre de coupes dans les segments est", len(results))
 
 def main():
     """
