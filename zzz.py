@@ -37,6 +37,14 @@ def load_events(segments_origin, events, dict_seg, results):
         dict_seg[pt_max][1].add(segment)
         if dict_seg[pt_max][0] and dict_seg[pt_max][1]:
             results.append(pt_max)
+        if len(dict_seg[pt_max][0]) > 1:
+            results.append(pt_max)
+        if len(dict_seg[pt_max][1]) > 1:
+            results.append(pt_max)
+        if len(dict_seg[pt_min][0]) > 1:
+            results.append(pt_min)
+        if len(dict_seg[pt_min][1]) > 1:
+            results.append(pt_min)
 
 def load_file(filename):
     """
