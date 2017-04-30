@@ -35,15 +35,9 @@ def load_events(segments_origin, events, dict_seg, results):
             heappush(events, pt_max)
             dict_seg[pt_max] = [set(), set()]
         dict_seg[pt_max][1].add(segment)
-        if dict_seg[pt_max][0] and dict_seg[pt_max][1]:
+        if (dict_seg[pt_max][0] and dict_seg[pt_max][1]) or len(dict_seg[pt_max][0]) > 1 or len(dict_seg[pt_max][1]) > 1:
             results.append(pt_max)
-        if len(dict_seg[pt_max][0]) > 1:
-            results.append(pt_max)
-        if len(dict_seg[pt_max][1]) > 1:
-            results.append(pt_max)
-        if len(dict_seg[pt_min][0]) > 1:
-            results.append(pt_min)
-        if len(dict_seg[pt_min][1]) > 1:
+        if len(dict_seg[pt_min][0]) > 1 or len(dict_seg[pt_min][1]) > 1:
             results.append(pt_min)
 
 def load_file(filename):
