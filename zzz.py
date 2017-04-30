@@ -35,7 +35,9 @@ def load_events(segments_origin, events, dict_seg, results):
             heappush(events, pt_max)
             dict_seg[pt_max] = [set(), set()]
         dict_seg[pt_max][1].add(segment)
-        if (dict_seg[pt_max][0] and dict_seg[pt_max][1]) or len(dict_seg[pt_max][0]) > 1 or len(dict_seg[pt_max][1]) > 1:
+        if (dict_seg[pt_max][0] and dict_seg[pt_max][1]) or \
+           len(dict_seg[pt_max][0]) > 1 or \
+           len(dict_seg[pt_max][1]) > 1:
             results.append(pt_max)
         if len(dict_seg[pt_min][0]) > 1 or len(dict_seg[pt_min][1]) > 1:
             results.append(pt_min)
@@ -111,19 +113,13 @@ def test(filename):
                 # END DEBUG
 
                 if sweep[i] != segment and i < len(sweep)-1:
-                    for i, s in enumerate(sweep):
-                        if s == segment:
+                    for i, tmp in enumerate(sweep):
+                        if tmp == segment:
                             debug_print(("real i =", i), DEBUG)
                             debug_pause(pause=PAUSE)
                             break
-                if i > 1 and key(sweep[i-1], current) == key(segment, current):
-                    left = i - 2
-                else:
-                    left = i - 1
-                if i < len(sweep) - 1 and key(sweep[i+1], current) == key(segment, current):
-                    right = i + 2
-                else:
-                    right = i + 1
+                left = i-1-(i > 1 and key(sweep[i-1], current) == key(segment, current))
+                right = i+1+(i < len(sweep)-1 and key(sweep[i+1], current) == key(segment, current))
 
                 debug_print(("default i =", i), DEBUG)
                 if left >= 0 and right < len(sweep):
@@ -166,20 +162,13 @@ def test(filename):
 
 
                 if sweep[i] != segment and i < len(sweep)-1:
-                    for i, s in enumerate(sweep):
-                        if s == segment:
+                    for i, tmp in enumerate(sweep):
+                        if tmp == segment:
                             debug_print(("real i =", i), DEBUG)
                             debug_pause(pause=PAUSE)
                             break
-
-                if i > 1 and key(sweep[i-1], current) == key(segment, current):
-                    left = i - 2
-                else:
-                    left = i - 1
-                if i < len(sweep) - 1 and key(sweep[i+1], current) == key(segment, current):
-                    right = i + 2
-                else:
-                    right = i + 1
+                left = i-1-(i > 1 and key(sweep[i-1], current) == key(segment, current))
+                right = i+1+(i < len(sweep)-1 and key(sweep[i+1], current) == key(segment, current))
 
                 debug_print(("left:", left, ", right:", right), DEBUG)
                 #On traite à gauche
