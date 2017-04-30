@@ -12,13 +12,14 @@ from heapq import heappush, heappop
 from sortedcontainers import SortedList
 from geo.tycat import tycat
 from geo.segment import load_segments, load_segments_stdin, Segment, key
+from debug import debug_sweep, debug_print, debug_pause
 
 DEBUG = False
-ENTER = False
+PAUSE = False
 MORE = False
 STOP = []
 
-def load_events(segments_origin, events, dict_seg):
+def load_events(segments_origin, events, dict_seg, results):
     """
     Load all events
     """
@@ -28,10 +29,14 @@ def load_events(segments_origin, events, dict_seg):
             heappush(events, pt_min)
             dict_seg[pt_min] = [set(), set()]
         dict_seg[pt_min][0].add(segment)
+        if dict_seg[pt_min][0] and dict_seg[pt_min][1]:
+            results.append(pt_min)
         if pt_max not in dict_seg:
             heappush(events, pt_max)
             dict_seg[pt_max] = [set(), set()]
         dict_seg[pt_max][1].add(segment)
+        if dict_seg[pt_max][0] and dict_seg[pt_max][1]:
+            results.append(pt_max)
 
 def load_file(filename):
     """
@@ -56,7 +61,8 @@ def intersect_process(intrsctn, results, dict_seg, events, to_add):
             dict_seg[intrsctn] = [set(), set()]
         tmp = dict_seg[intrsctn]
         for elem in to_add:
-            tmp[0].add(elem)
+            if elem not in tmp[1]:
+                tmp[0].add(elem)
             tmp[1].add(elem)
 
 def test(filename):
@@ -70,43 +76,70 @@ def test(filename):
 
     adjuster, segments_origin = load_file(filename)
     Segment.adjuster = adjuster
-    load_events(segments_origin, events, dict_seg)
+    load_events(segments_origin, events, dict_seg, results)
 
     count = 0
 
     while events: #Traitement des événements
         count += 1
-        print(count)
+        # debug_print(("ITER:", count))
         current = heappop(events) #On récupère le point à traiter
         segments = dict_seg[current] #On récupèrer ses segments associés (in, out)
         if DEBUG or count in STOP:
-            print("Current:", current, segments)
-            print("Events:", events)
-            print("SL:", len(sweep), sweep)
+            # print("Events:", events)
+            # print("SL:", len(sweep), sweep)
             tycat(segments_origin, results, current, sweep, segments[0], segments[1])
+            print("###############")
+            print("Current:", current, segments)
             print("###############")
 
         if segments[1]: #On traite les out
             while segments[1]:
                 segment = segments[1].pop()
-                # DEBUG
+
+
                 if MORE or count in STOP:
-                    print("{")
-                    for tmp in sweep: # AFFICHE LES COUPLES (KEY, SEGMENT)
-                        print("\t-", key(tmp, current), tmp)
-                    print("}")
+                    tycat(segments_origin, results, current, sweep, segment)
+                debug_print(("DO : OUT", segment), DEBUG)
+                i = sweep.bisect_left(segment)
+
+                # DEBUG
+                debug_print(("on cherche", key(segment, current), segment), DEBUG)
+                debug_print(("default i =", i), DEBUG)
+                debug_sweep(sweep, current, DEBUG, PAUSE)
                 # END DEBUG
-                i = sweep.index(segment)
-                left, right = i - 1, i + 1
+
+                if sweep[i] != segment and i < len(sweep)-1:
+                    for i, s in enumerate(sweep):
+                        if s == segment:
+                            debug_print(("real i =", i), DEBUG)
+                            debug_pause(pause=PAUSE)
+                            break
+                if i > 1 and key(sweep[i-1], current) == key(segment, current):
+                    left = i - 2
+                else:
+                    left = i - 1
+                if i < len(sweep) - 1 and key(sweep[i+1], current) == key(segment, current):
+                    right = i + 2
+                else:
+                    right = i + 1
+
+                debug_print(("default i =", i), DEBUG)
                 if left >= 0 and right < len(sweep):
                     left, right = sweep[left], sweep[right]
                     intrsctn = left.intersection_with(right)
-                    if intrsctn:
+                    if intrsctn and intrsctn != current:
                         intrsctn = adjuster.hash_point(intrsctn)
                         intersect_process(intrsctn, results, dict_seg, events, [left, right])
-                sweep.remove(segment)
-                if MORE or count in STOP:
-                    tycat(segments_origin, results, current, sweep, segment)
+
+                # DEBUG
+                debug_print(("del i =", i), DEBUG)
+                debug_sweep(sweep, current, DEBUG, PAUSE)
+                # END DEBUG
+                del sweep[i]
+                # DEBUG
+                debug_sweep(sweep, current, DEBUG, PAUSE)
+                # END DEBUG
 
         if MORE or count in STOP:
             print("###### IN", current)
@@ -114,47 +147,67 @@ def test(filename):
 
         if segments[0]: #On traite les in
             while segments[0]:
+                #print(segments[0])
                 segment = segments[0].pop()
-                sweep.add(segment)
-                # DEBUG
+                #print(segments[0])
                 if MORE or count in STOP:
-                    print("{")
-                    for tmp in sweep:
-                        print("\t-", key(tmp, current), tmp)
-                    print("}")
-                i = sweep.index(segment)
+                    tycat(segments_origin, results, current, sweep, segment)
+                debug_print(("DO : IN", segment), DEBUG)
+                sweep.add(segment)
+                debug_sweep(sweep, current, DEBUG, PAUSE)
+                debug_print(("add", segment), DEBUG)
+                i = sweep.bisect_left(segment)
+                # DEBUG
+                debug_print(("on cherche", key(segment, current), segment), DEBUG)
+                debug_print(("default i =", i), DEBUG)
+                debug_sweep(sweep, current, DEBUG, PAUSE)
                 # END DEBUG
 
+
+                if sweep[i] != segment and i < len(sweep)-1:
+                    for i, s in enumerate(sweep):
+                        if s == segment:
+                            debug_print(("real i =", i), DEBUG)
+                            debug_pause(pause=PAUSE)
+                            break
+
+                if i > 1 and key(sweep[i-1], current) == key(segment, current):
+                    left = i - 2
+                else:
+                    left = i - 1
+                if i < len(sweep) - 1 and key(sweep[i+1], current) == key(segment, current):
+                    right = i + 2
+                else:
+                    right = i + 1
+
+                debug_print(("left:", left, ", right:", right), DEBUG)
                 #On traite à gauche
-                left = i - 1
                 if left >= 0:
                     left = sweep[left]
                     intrsctn = segment.intersection_with(left)
-                    if intrsctn:
+                    if intrsctn and intrsctn != current:
                         intrsctn = adjuster.hash_point(intrsctn)
                         intersect_process(intrsctn, results, dict_seg, events, [segment, left])
 
                 #Idem à droite
-                right = i + 1
                 if right < len(sweep):
                     right = sweep[right]
                     intrsctn = segment.intersection_with(right)
-                    if intrsctn:
+                    if intrsctn and intrsctn != current:
                         intrsctn = adjuster.hash_point(intrsctn)
                         intersect_process(intrsctn, results, dict_seg, events, [segment, right])
-                if MORE or count in STOP:
-                    tycat(segments_origin, results, current, sweep, segment)
+                #print(segments[0])
 
         if DEBUG or count in STOP:
+            # print("Events:", events)
+            # print("SL:", len(sweep), sweep)
+            print("############### END WHILE")
             print("Current:", current, segments)
-            print("Events:", events)
-            print("SL:", len(sweep), sweep)
-            print(results)
             tycat(segments_origin, results, current, sweep)
-        if ENTER:
+        if PAUSE:
             input("Press [ENTER] to continue...\n")
     tycat(segments_origin, results)
-    if ENTER:
+    if PAUSE:
         input("Press [ENTER] to continue...\n")
     # print("le nombre d'intersections (= le nombre de points differents) est", len(results))
     # print("le nombre de coupes dans les segments est", nb_coupes)
