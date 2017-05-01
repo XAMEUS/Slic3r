@@ -12,7 +12,7 @@ from itertools import combinations
 from geo.tycat import tycat
 from geo.segment import load_segments, load_segments_stdin
 
-def test(filename):
+def test(filename, graph):
     """
     Launch bruteforce test on filename or stdin
     """
@@ -20,13 +20,15 @@ def test(filename):
         _, segments_origin = load_segments(filename)
     else:
         _, segments_origin = load_segments_stdin()
-    tycat(segments_origin)
+    if graph:
+        tycat(segments_origin)
     results = []
     for sega, segb in combinations(segments_origin, 2):
         candidate = sega.intersection_with(segb)
         if candidate is not None:
             results.append(candidate)
-    tycat(segments_origin, results)
+    if graph:
+        tycat(segments_origin, results)
 
 
 def main():
@@ -34,9 +36,9 @@ def main():
     launch test on each file.
     """
     if len(sys.argv) == 1:
-        test(None)
+        test(None, True)
     for filename in sys.argv[1:]:
-        test(filename)
+        test(filename, True)
 
 if __name__ == '__main__':
     main()
