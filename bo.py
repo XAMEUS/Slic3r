@@ -24,7 +24,7 @@ def load_events(segments_origin, events, dict_seg, results):
             dict_seg[pt_min] = [set(), set()]
         dict_seg[pt_min][0].add(segment)
         if dict_seg[pt_min][0] and dict_seg[pt_min][1]:
-            results.append(pt_min)
+            results.add(pt_min)
         if pt_max not in dict_seg:
             heappush(events, pt_max)
             dict_seg[pt_max] = [set(), set()]
@@ -32,9 +32,9 @@ def load_events(segments_origin, events, dict_seg, results):
         if (dict_seg[pt_max][0] and dict_seg[pt_max][1]) or \
            len(dict_seg[pt_max][0]) > 1 or \
            len(dict_seg[pt_max][1]) > 1:
-            results.append(pt_max)
+            results.add(pt_max)
         if len(dict_seg[pt_min][0]) > 1 or len(dict_seg[pt_min][1]) > 1:
-            results.append(pt_min)
+            results.add(pt_min)
 
 def load_file(filename, graph):
     """
@@ -57,7 +57,7 @@ def test_intersect(results, dict_seg, events, adjuster, current, order):
     if intrsctn and intrsctn != current:
         intrsctn = adjuster.hash_point(intrsctn)
         if intrsctn not in results: # Intersection non-nulle et nouvelle
-            results.append(intrsctn)
+            results.add(intrsctn)
             if intrsctn not in dict_seg:
                 heappush(events, intrsctn)
                 dict_seg[intrsctn] = [set(), set()]
@@ -93,7 +93,7 @@ def test(filename, graph):
     events = [] #Tas des événements: (point)
     dict_seg = {} #Dictionnaire contenant les segments (in, out) au point en arg
     sweep = SortedList(load=10) #(Sorted)List des segments en vie
-    results = [] #Les points finaux
+    results = set() #Les points finaux
 
     adjuster, segments_origin = load_file(filename, graph)
     Segment.adjuster = adjuster
