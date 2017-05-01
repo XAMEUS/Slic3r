@@ -137,7 +137,7 @@ def key(segment, current):
     x_clef = compute_x(segment, current)
     return (x_clef, segment.angle * (1 - 2 * (current.coordinates[0] > x_clef)))
 
-@lru_cache(maxsize=32768)
+@lru_cache(maxsize=None)
 def compute_x(segment, current):
     """
     Compute x with a cache

@@ -11,7 +11,7 @@ import sys
 from heapq import heappush, heappop
 from sortedcontainers import SortedList
 from geo.tycat import tycat
-from geo.segment import load_segments, load_segments_stdin, Segment, key
+from geo.segment import load_segments, load_segments_stdin, Segment, key, compute_x
 
 def load_events(segments_origin, events, dict_seg, results):
     """
@@ -36,7 +36,7 @@ def load_events(segments_origin, events, dict_seg, results):
         if len(dict_seg[pt_min][0]) > 1 or len(dict_seg[pt_min][1]) > 1:
             results.append(pt_min)
 
-def load_file(filename):
+def load_file(filename, graph):
     """
     Load file
     """
@@ -44,9 +44,11 @@ def load_file(filename):
         adjuster, segments_origin = load_segments(filename)
     else:
         adjuster, segments_origin = load_segments_stdin()
-    tycat(segments_origin)
+    if graph:
+        tycat(segments_origin)
     return adjuster, segments_origin
 
+#pylint: disable-msg=too-many-arguments
 def test_intersect(results, dict_seg, events, adjuster, current, order):
     """
     Have we a intersection ? If yes, we do the necessary
@@ -65,16 +67,16 @@ def test_intersect(results, dict_seg, events, adjuster, current, order):
                     tmp[0].add(elem)
                 tmp[1].add(elem)
 
-def test(filename):
+def test(filename, graph):
     """
     run bentley ottmann
     """
     events = [] #Tas des événements: (point)
     dict_seg = {} #Dictionnaire contenant les segments (in, out) au point en arg
-    sweep = SortedList() #(Sorted)List des segments en vie
+    sweep = SortedList(load=10) #(Sorted)List des segments en vie
     results = [] #Les points finaux
 
-    adjuster, segments_origin = load_file(filename)
+    adjuster, segments_origin = load_file(filename, graph)
     Segment.adjuster = adjuster
     load_events(segments_origin, events, dict_seg, results)
 
@@ -125,19 +127,24 @@ def test(filename):
                 test_intersect(results, dict_seg, events, adjuster, current,
                                [segment, sweep[right]])
             #print(segments[0])
-
-    tycat(segments_origin, results)
-    print("le nombre d'intersections (= le nombre de points differents) est", len(set(results)))
-    print("le nombre de coupes dans les segments est", len(results))
+    return (segments_origin, results)
 
 def main():
     """
     launch test on each file.
     """
     if len(sys.argv) == 1:
-        test(None)
+        segments_origin, results = test(None, True)
+        tycat(segments_origin, results)
+        print("le nombre d'intersections (= le nombre de points differents) est", len(set(results)))
+        print("le nombre de coupes dans les segments est", len(results))
+
     for filename in sys.argv[1:]:
-        test(filename)
+        segments_origin, results = test(filename, True)
+        compute_x.cache_clear()
+        tycat(segments_origin, results)
+        print("le nombre d'intersections (= le nombre de points differents) est", len(set(results)))
+        print("le nombre de coupes dans les segments est", len(results))
 
 if __name__ == '__main__':
     main()
