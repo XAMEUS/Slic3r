@@ -67,6 +67,19 @@ def test_intersect(results, dict_seg, events, adjuster, current, order):
                     tmp[0].add(elem)
                 tmp[1].add(elem)
 
+def take_neighbors(sweep, segment, current):
+    """
+    Takes the index of the segment and its neighbors which not having the same key
+    """
+    i = sweep.bisect_left(segment)
+    if sweep[i] != segment and i < len(sweep)-1:
+        for i, tmp in enumerate(sweep):
+            if tmp == segment:
+                break
+    left = i-1-(i > 1 and key(sweep[i-1], current) == key(segment, current))
+    right = i+1+(i < len(sweep)-1 and key(sweep[i+1], current) == key(segment, current))
+    return i, left, right
+
 def test(filename, graph):
     """
     run bentley ottmann
@@ -82,19 +95,11 @@ def test(filename, graph):
 
     while events: #Traitement des événements
         current = heappop(events) #On récupère le point à traiter
-        segments = dict_seg[current] #On récupèrer ses segments associés (in, out)
+        segments = dict_seg[current] #On récupère ses segments associés (in, out)
 
         while segments[1]: #On traite les out
             segment = segments[1].pop()
-
-            i = sweep.bisect_left(segment)
-
-            if sweep[i] != segment and i < len(sweep)-1:
-                for i, tmp in enumerate(sweep):
-                    if tmp == segment:
-                        break
-            left = i-1-(i > 1 and key(sweep[i-1], current) == key(segment, current))
-            right = i+1+(i < len(sweep)-1 and key(sweep[i+1], current) == key(segment, current))
+            i, left, right = take_neighbors(sweep, segment, current)
 
             if left >= 0 and right < len(sweep):
                 test_intersect(results, dict_seg, events, adjuster, current,
@@ -106,27 +111,18 @@ def test(filename, graph):
 
         while segments[0]: #On traite les in
             segment = segments[0].pop()
-
             sweep.add(segment)
-            i = sweep.bisect_left(segment)
-
-            if sweep[i] != segment and i < len(sweep)-1:
-                for i, tmp in enumerate(sweep):
-                    if tmp == segment:
-                        break
-            left = i-1-(i > 1 and key(sweep[i-1], current) == key(segment, current))
-            right = i+1+(i < len(sweep)-1 and key(sweep[i+1], current) == key(segment, current))
+            _, left, right = take_neighbors(sweep, segment, current)
 
             #On traite à gauche
             if left >= 0:
                 test_intersect(results, dict_seg, events, adjuster, current,
                                [segment, sweep[left]])
-
             #Idem à droite
             if right < len(sweep):
                 test_intersect(results, dict_seg, events, adjuster, current,
                                [segment, sweep[right]])
-            #print(segments[0])
+
     return (segments_origin, results)
 
 def main():
