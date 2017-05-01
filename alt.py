@@ -13,9 +13,6 @@ from sortedcontainers import SortedList
 from geo.tycat import tycat
 from geo.segment import load_segments, load_segments_stdin, Segment
 
-DEBUG = False
-ENTER = False
-
 def load_events(segments_origin, events, dict_seg):
     """
     Load all events
@@ -33,7 +30,7 @@ def load_events(segments_origin, events, dict_seg):
         else:
             dict_seg[pt_max] = [[], [], [segment]]
 
-def load_file(filename):
+def load_file(filename, graph):
     """
     Load file
     """
@@ -41,11 +38,12 @@ def load_file(filename):
         adjuster, segments_origin = load_segments(filename)
     else:
         adjuster, segments_origin = load_segments_stdin()
-    tycat(segments_origin)
+    if graph:
+        tycat(segments_origin)
     Segment.adjuster = adjuster
     return adjuster, segments_origin
 
-def test(filename):
+def test(filename, graph):
     """
     run bentley ottmann
     """
@@ -54,22 +52,13 @@ def test(filename):
     sweep = SortedList() #(Sorted)List des segments en vie
     results = [] #Les points finaux
 
-    _, segments_origin = load_file(filename)
+    _, segments_origin = load_file(filename, graph)
     load_events(segments_origin, events, dict_seg)
 
 
     while events: #Traitement des événements
         current = heappop(events)
         segments = dict_seg[current]
-
-        if DEBUG:
-            print("Current:", current, segments)
-            print("Events:", events)
-            print("SL:", len(sweep), sweep)
-            tycat(segments_origin, results, current, sweep)
-            print("in", segments[0])
-            print("inter", segments[1])
-            print("out", segments[2])
 
         if segments[2]: # out
             while segments[2]:
@@ -88,11 +77,8 @@ def test(filename):
                     intrsctn = segment.intersection_with(other)
                     if intrsctn and intrsctn not in results:
                         results.append(intrsctn)
-        if ENTER:
-            input("Press [ENTER] to continue...\n")
-    tycat(segments_origin, results)
-    if ENTER:
-        input("Press [ENTER] to continue...\n")
+    if graph:
+        tycat(segments_origin, results)
     print("le nombre d'intersections (= le nombre de points differents) est", len(set(results)))
     print("le nombre de coupes dans les segments est", len(results))
 
@@ -101,9 +87,9 @@ def main():
     launch test on each file.
     """
     if len(sys.argv) == 1:
-        test(None)
+        test(None, True)
     for filename in sys.argv[1:]:
-        test(filename)
+        test(filename, True)
 
 if __name__ == '__main__':
     main()

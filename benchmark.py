@@ -1,13 +1,31 @@
+#!/usr/bin/env python3
 """
 A simple benchmark
 """
 import sys
 import time
 import matplotlib.pyplot as plt
+import numpy as np
 import alt
 import bruteforce
-import algo
+import bo
 
+def mini_bench(fun, arg_file):
+    """
+    Run a mini benchmark 10 times, return statistics
+    """
+    time_bench, ecart, tmp = None, None, [0 for _ in range(10)]
+    timer = -time.time()
+    for i in range(10):
+        fun.test(arg_file, False)
+        tmp[i] = time.time()
+    time_bench = (timer + tmp[-1]) / 10
+
+    for i in range(9, 0, -1):
+        tmp[i] -= tmp[i-1]
+    tmp[0] += timer
+    ecart = (sum([(i - time_bench)**2 for i in tmp]))**(1/2)
+    return time_bench, ecart
 
 def main():
     """
@@ -15,30 +33,37 @@ def main():
     """
     time_alt = []
     time_bruteforce = []
-    time_algo = []
+    time_bo = []
+    ecart_alt = []
+    ecart_bruteforce = []
+    ecart_bo = []
+
     for arg_file in sys.argv[1:]:
-        timer_alt = -time.time()
-        for _ in range(10):
-            alt.test(arg_file)
-        time_alt.append(timer_alt + time.time())
-        timer_bruteforce = -time.time()
-        for _ in range(10):
-            bruteforce.test(arg_file)
-        time_bruteforce.append(timer_bruteforce + time.time())
-        timer_algo = -time.time()
-        for _ in range(10):
-            algo.test(arg_file)
-        time_algo.append(timer_algo + time.time())
+        res = mini_bench(alt, arg_file)
+        time_alt.append(res[0])
+        ecart_alt.append(res[1])
 
-    alt_plt = plt.scatter(range(len(time_alt)), time_alt, s=100, color="red")
-    brut_plt = plt.scatter(range(len(time_bruteforce)), time_bruteforce, s=100, color="blue")
-    algo_plt = plt.scatter(range(len(time_algo)), time_algo, s=100, color="green")
+        res = mini_bench(bruteforce, arg_file)
+        time_bruteforce.append(res[0])
+        ecart_bruteforce.append(res[1])
 
-    plt.legend([alt_plt, brut_plt, algo_plt], ['Alt', 'Bruteforce', 'Algo'])
-    plt.ylabel('Temps (*10 s)')
-    plt.xlabel('Numéro Fichier')
-    plt.legend()
+        res = mini_bench(bo, arg_file)
+        time_bo.append(res[0])
+        ecart_bo.append(res[1])
+
+    ind = np.arange(len(time_alt))    # the x locations for the groups
+    width = 0.2       # the width of the bars: can also be len(x) sequence
+
+    data_1 = plt.bar(ind-width, time_alt, width, color='green', yerr=ecart_alt)
+    data_2 = plt.bar(ind, time_bruteforce, width, color='blue', yerr=ecart_bruteforce)
+    data_3 = plt.bar(ind+width, time_bo, width, color='red', yerr=ecart_bo)
+
+    plt.ylabel('Temps')
+    plt.xticks(ind, sys.argv[1:])
+    plt.legend((data_1[0], data_2[0], data_3[0]), ('Alt', 'Bruteforce', 'Bo'))
     plt.show()
+
+
 
 if __name__ == '__main__':
     main()
