@@ -82,51 +82,49 @@ def test(filename):
         current = heappop(events) #On récupère le point à traiter
         segments = dict_seg[current] #On récupèrer ses segments associés (in, out)
 
-        if segments[1]: #On traite les out
-            while segments[1]:
-                segment = segments[1].pop()
+        while segments[1]: #On traite les out
+            segment = segments[1].pop()
 
-                i = sweep.bisect_left(segment)
+            i = sweep.bisect_left(segment)
 
-                if sweep[i] != segment and i < len(sweep)-1:
-                    for i, tmp in enumerate(sweep):
-                        if tmp == segment:
-                            break
-                left = i-1-(i > 1 and key(sweep[i-1], current) == key(segment, current))
-                right = i+1+(i < len(sweep)-1 and key(sweep[i+1], current) == key(segment, current))
+            if sweep[i] != segment and i < len(sweep)-1:
+                for i, tmp in enumerate(sweep):
+                    if tmp == segment:
+                        break
+            left = i-1-(i > 1 and key(sweep[i-1], current) == key(segment, current))
+            right = i+1+(i < len(sweep)-1 and key(sweep[i+1], current) == key(segment, current))
 
-                if left >= 0 and right < len(sweep):
-                    test_intersect(results, dict_seg, events, adjuster, current,
-                                   [sweep[left], sweep[right]])
+            if left >= 0 and right < len(sweep):
+                test_intersect(results, dict_seg, events, adjuster, current,
+                               [sweep[left], sweep[right]])
 
-                del sweep[i]
+            del sweep[i]
 
         Segment.point = current #On actualise le point: pt de référence
 
-        if segments[0]: #On traite les in
-            while segments[0]:
-                segment = segments[0].pop()
+        while segments[0]: #On traite les in
+            segment = segments[0].pop()
 
-                sweep.add(segment)
-                i = sweep.bisect_left(segment)
+            sweep.add(segment)
+            i = sweep.bisect_left(segment)
 
-                if sweep[i] != segment and i < len(sweep)-1:
-                    for i, tmp in enumerate(sweep):
-                        if tmp == segment:
-                            break
-                left = i-1-(i > 1 and key(sweep[i-1], current) == key(segment, current))
-                right = i+1+(i < len(sweep)-1 and key(sweep[i+1], current) == key(segment, current))
+            if sweep[i] != segment and i < len(sweep)-1:
+                for i, tmp in enumerate(sweep):
+                    if tmp == segment:
+                        break
+            left = i-1-(i > 1 and key(sweep[i-1], current) == key(segment, current))
+            right = i+1+(i < len(sweep)-1 and key(sweep[i+1], current) == key(segment, current))
 
-                #On traite à gauche
-                if left >= 0:
-                    test_intersect(results, dict_seg, events, adjuster, current,
-                                   [segment, sweep[left]])
+            #On traite à gauche
+            if left >= 0:
+                test_intersect(results, dict_seg, events, adjuster, current,
+                               [segment, sweep[left]])
 
-                #Idem à droite
-                if right < len(sweep):
-                    test_intersect(results, dict_seg, events, adjuster, current,
-                                   [segment, sweep[right]])
-                #print(segments[0])
+            #Idem à droite
+            if right < len(sweep):
+                test_intersect(results, dict_seg, events, adjuster, current,
+                               [segment, sweep[right]])
+            #print(segments[0])
 
     tycat(segments_origin, results)
     print("le nombre d'intersections (= le nombre de points differents) est", len(set(results)))
