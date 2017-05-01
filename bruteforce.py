@@ -29,8 +29,10 @@ def test(filename, graph):
             results.append(candidate)
     if graph:
         tycat(segments_origin, results)
-
-
+    if filename:
+        print(filename, ": ", len(results), " intersection(s)")
+    else:
+        print("stdin: ", len(results), " intersection(s)")
 def main():
     """
     launch test on each file.

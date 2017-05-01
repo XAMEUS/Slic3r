@@ -138,15 +138,14 @@ def main():
     if len(sys.argv) == 1:
         segments_origin, results = test(None, True)
         tycat(segments_origin, results)
-        print("le nombre d'intersections (= le nombre de points differents) est", len(set(results)))
-        print("le nombre de coupes dans les segments est", len(results))
+        print("stdin: ", len(results), " intersection(s)")
+
 
     for filename in sys.argv[1:]:
         segments_origin, results = test(filename, True)
         compute_x.cache_clear()
         tycat(segments_origin, results)
-        print("le nombre d'intersections (= le nombre de points differents) est", len(set(results)))
-        print("le nombre de coupes dans les segments est", len(results))
+        print(filename, ": ", len(results), " intersection(s)")
 
 if __name__ == '__main__':
     main()

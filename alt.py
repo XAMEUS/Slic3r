@@ -79,8 +79,10 @@ def test(filename, graph):
                         results.append(intrsctn)
     if graph:
         tycat(segments_origin, results)
-    print("le nombre d'intersections (= le nombre de points differents) est", len(set(results)))
-    print("le nombre de coupes dans les segments est", len(results))
+    if filename:
+        print(filename, ": ", len(results), " intersection(s)")
+    else:
+        print("stdin: ", len(results), " intersection(s)")
 
 def main():
     """
