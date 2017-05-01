@@ -71,14 +71,20 @@ def take_neighbors(sweep, segment, current):
     """
     Takes the index of the segment and its neighbors which not having the same key
     """
-    i = sweep.bisect_left(segment)
-    if sweep[i] != segment and i < len(sweep)-1:
-        for i, tmp in enumerate(sweep):
-            if tmp == segment:
-                break
-    left = i-1-(i > 1 and key(sweep[i-1], current) == key(segment, current))
-    right = i+1+(i < len(sweep)-1 and key(sweep[i+1], current) == key(segment, current))
-    return i, left, right
+    try:
+        i = sweep.bisect_left(segment)
+        if sweep[i] != segment and i < len(sweep)-1:
+            for i, tmp in enumerate(sweep):
+                if tmp == segment:
+                    break
+        left = i-1-(i > 1 and key(sweep[i-1], current) == key(segment, current))
+        right = i+1+(i < len(sweep)-1 and key(sweep[i+1], current) == key(segment, current))
+        return i, left, right
+    except IndexError:
+        sweep = SortedList(list(sweep), load=10)
+        return take_neighbors(sweep, segment, current)
+
+
 
 def test(filename, graph):
     """
