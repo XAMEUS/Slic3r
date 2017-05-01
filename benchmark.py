@@ -59,7 +59,7 @@ def main():
     data_3 = plt.bar(ind+width, time_bo, width, color='red', yerr=ecart_bo)
 
     plt.ylabel('Temps')
-    plt.xticks(ind, sys.argv[1:])
+    plt.xticks(ind, [i.split("/")[-1] for i in sys.argv[1:]])
     plt.legend((data_1[0], data_2[0], data_3[0]), ('Alt', 'Bruteforce', 'Bo'))
     plt.show()
 
